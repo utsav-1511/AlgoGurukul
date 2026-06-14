@@ -3,8 +3,13 @@ const axios = require("axios");
 const getLanguageId=(lang)=>{
     const language={
         "cpp":54,
+        "C++":54,
         "java":62 ,
-        "python":71
+        "Java":62 ,
+        "javascript":63,
+        "Javascript":63,
+        "python":71,
+        "Python":71
     }
     console.log(language[lang]);
     return language[lang];

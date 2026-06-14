@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate, useNavigate } from "react-router";
 import Homepage from "./pages/Homepage";
 import Login  from "./pages/Login";
 import Register from "./pages/Register";
@@ -8,6 +8,24 @@ import {useSelector,useDispatch} from "react-redux";
 import { useEffect } from "react";
 import AdminPanel from "./pages/AdminPanel";
 import ProblemPage from "./pages/ProblemPage";
+import AdminCreate from "./Components/AdminCreate";
+import AdminDashboard from "./pages/AdminDashboard";
+import UserDashboard from "./pages/UserDashboard";
+import AdminDelete from "./Components/AdminDelete";
+
+function AdminRoute({ user, children }) {
+  const navigate = useNavigate();
+  const isAdmin = user?.role?.toLowerCase() === "admin";
+
+  useEffect(() => {
+    if (!isAdmin) {
+      alert("You are not Admin");
+      navigate("/", { replace: true });
+    }
+  }, [isAdmin, navigate]);
+
+  return isAdmin ? children : null;
+}
 
 function App() {
   const {isAuthenticated,loading,user}=useSelector((state)=>state.auth);
@@ -25,11 +43,14 @@ if (loading) {
     <>
       <Routes>
         <Route path="/" element={isAuthenticated ?<Homepage/>:<Navigate to="/signup"></Navigate>}></Route>
+        <Route path="/dashboard" element={isAuthenticated ?<UserDashboard/>:<Navigate to="/signin"></Navigate>}></Route>
         <Route path="/signin" element={isAuthenticated ?<Navigate to="/"></Navigate>:<Login/>}></Route>
         <Route path="/signup" element={isAuthenticated ?<Navigate to="/"></Navigate>:<Register/>}></Route>
         <Route path="/problem/:problemId" element={<ProblemPage/>}></Route>
-        {/* <Route path="/admin" element={<AdminPanel/>}></Route> */}
-        <Route path="/admin" element={isAuthenticated && user?.role=="admin" ?<Navigate to="/"></Navigate>:<AdminPanel/>}></Route>
+        <Route path="/admin" element={<AdminRoute user={user}><AdminPanel/></AdminRoute>}></Route>
+        <Route path="/admin/dashboard" element={<AdminRoute user={user}><AdminDashboard/></AdminRoute>}></Route>
+        <Route path="/admin/create" element={<AdminRoute user={user}><AdminCreate/></AdminRoute>}></Route>
+        <Route path="/admin/delete" element={<AdminRoute user={user}><AdminDelete/></AdminRoute>}></Route>
       </Routes>
     </>
   ) 

@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Home, RefreshCw, Zap,Video } from 'lucide-react';
+import { BarChart3, Plus, Edit, Trash2, Video } from 'lucide-react';
 import { NavLink } from 'react-router';
 
 function AdminPanel() {
-  const [selectedOption, setSelectedOption] = useState(null);
-
   const adminOptions = [
+    {
+      id: 'dashboard',
+      title: 'Reporting Dashboard',
+      description: 'View platform reports and the latest analytics',
+      icon: BarChart3,
+      color: 'btn-primary',
+      bgColor: 'bg-primary/10',
+      route: '/admin/dashboard'
+    },
     {
       id: 'create',
       title: 'Create Problem',

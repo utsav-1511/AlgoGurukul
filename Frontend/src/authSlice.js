@@ -1,6 +1,23 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axiosClient from './utils/axiosClient'
 
+const ROLE_STORAGE_KEY = 'algogurukul-role';
+
+const saveRole = (role) => {
+  if (role) {
+    localStorage.setItem(ROLE_STORAGE_KEY, role);
+  }
+};
+
+const clearRole = () => {
+  localStorage.removeItem(ROLE_STORAGE_KEY);
+};
+
+const withStoredRole = (user) => ({
+  ...user,
+  role: user?.role || localStorage.getItem(ROLE_STORAGE_KEY) || 'user',
+});
+
 const getErrorMessage = (error) =>
   typeof error.response?.data === 'string'
     ? error.response.data
@@ -11,7 +28,9 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
     const response =  await axiosClient.post('/user/register', userData);
-    return response.data.user;
+    const user = response.data.user;
+    saveRole(user?.role);
+    return user;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -24,7 +43,9 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axiosClient.post('/user/login', credentials);
-      return response.data.user;
+      const user = response.data.user;
+      saveRole(user?.role);
+      return user;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));
     }
@@ -36,7 +57,7 @@ export const checkAuth = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await axiosClient.get('/user/check');
-      return data.user;
+      return withStoredRole(data.user);
     } catch (error) {
       if (error.response?.status === 401) {
         return rejectWithValue(null); // Special case for no session
@@ -51,6 +72,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await axiosClient.post('/user/logout');
+      clearRole();
       return null;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error));

@@ -1,361 +1,298 @@
-    import { useEffect, useState } from 'react';
-    import { NavLink } from 'react-router';
-    import { useDispatch, useSelector } from 'react-redux';
-    import axiosClient from '../utils/axiosClient';
-    import { logoutUser } from '../authSlice';
-    import {
-    BookOpen, CheckCircle2, Code2, LogOut,
-    Shield, UserCircle, ChevronDown, BarChart2
-    } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { NavLink } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
+import axiosClient from '../utils/axiosClient';
+import { logoutUser } from '../authSlice';
+import {
+  BookOpen, CheckCircle2, Code2, LogOut,
+  Shield, ChevronDown, BarChart3
+} from 'lucide-react';
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-    /** Maps a difficulty string to the matching DaisyUI badge + text color classes. */
-    const getDifficultyBadgeColor = (difficulty = '') => {
-    switch (difficulty.toLowerCase()) {
-        case 'easy':   return 'badge-success';
-        case 'medium': return 'badge-warning';
-        case 'hard':   return 'badge-error';
-        default:       return 'badge-neutral';
-    }
+const getDifficultyColor = (difficulty = '') => {
+  switch (difficulty.toLowerCase()) {
+    case 'easy':   return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    case 'medium': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+    case 'hard':   return 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+    default:       return 'text-white/40 bg-white/5 border-white/10';
+  }
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+function Homepage() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  const [problems, setProblems]             = useState([]);
+  const [solvedProblems, setSolvedProblems] = useState([]);
+  const [filters, setFilters]               = useState({
+    difficulty: 'all',
+    tag:        'all',
+    status:     'all',
+  });
+
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        const { data } = await axiosClient.get('/problem/getAllProblem');
+        setProblems(data);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
+      }
     };
 
-    /** Returns a Tailwind text-color class for the mini progress bars. */
-    const getDifficultyBarColor = (level) => {
-    switch (level) {
-        case 'easy':   return 'bg-success';
-        case 'medium': return 'bg-warning';
-        case 'hard':   return 'bg-error';
-        default:       return 'bg-base-content';
-    }
+    const fetchSolvedProblems = async () => {
+      try {
+        const { data } = await axiosClient.get('/problem/problemSolvedByUser');
+        setSolvedProblems(data);
+      } catch (error) {
+        console.error('Error fetching solved problems:', error);
+      }
     };
 
-    // ─── Component ────────────────────────────────────────────────────────────────
+    fetchProblems();
+    if (user?._id) fetchSolvedProblems();
+  }, [user]);
 
-    function Homepage() {
-    const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.auth);
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    setSolvedProblems([]);
+  };
 
-    const [problems, setProblems]           = useState([]);
-    const [solvedProblems, setSolvedProblems] = useState([]);
-    const [filters, setFilters]             = useState({
-        difficulty: 'all',
-        tag:        'all',
-        status:     'all',
-    });
+  // ── Derived data ────────────────────────────────────────────────────────────
 
-    // Fetch all problems + solved list on mount / user change
-    useEffect(() => {
-        const fetchProblems = async () => {
-        try {
-            const { data } = await axiosClient.get('/problem/getAllProblem');
-            setProblems(data);
-        } catch (error) {
-            console.error('Error fetching problems:', error);
-        }
-        };
+  const filteredProblems = problems.filter((problem) => {
+    const difficultyMatch =
+      filters.difficulty === 'all' || problem.difficulty === filters.difficulty;
+    const tagMatch =
+      filters.tag === 'all' || problem.tags === filters.tag;
+    const statusMatch =
+      filters.status === 'all' ||
+      (filters.status === 'solved' &&
+        solvedProblems.some((sp) => sp._id === problem._id));
+    return difficultyMatch && tagMatch && statusMatch;
+  });
 
-        const fetchSolvedProblems = async () => {
-        try {
-            const { data } = await axiosClient.get('/problem/problemSolvedByUser');
-            setSolvedProblems(data);
-        } catch (error) {
-            console.error('Error fetching solved problems:', error);
-        }
-        };
+  // ── Render ──────────────────────────────────────────────────────────────────
 
-        fetchProblems();
-        if (user?._id) fetchSolvedProblems();
-    }, [user]);
+  return (
+    <div className="min-h-screen bg-black text-white">
 
-    /** Dispatch logout action and wipe local solved list. */
-    const handleLogout = () => {
-        dispatch(logoutUser());
-        setSolvedProblems([]);
-    };
+      {/* ── Navbar ── */}
+      <nav className="sticky top-0 z-30 flex items-center justify-between border-b border-white/[0.06] bg-black/80 px-6 backdrop-blur-md h-14">
 
-    // ── Derived data ────────────────────────────────────────────────────────────
+        {/* Brand */}
+        <NavLink to="/" className="flex items-center gap-2.5 font-bold text-sm tracking-tight">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-500/30">
+            <Code2 size={14} />
+          </span>
+          <span className="text-white">AlgoGurukul</span>
+        </NavLink>
 
-    /** Problems visible after applying the three active filters. */
-    const filteredProblems = problems.filter((problem) => {
-        const difficultyMatch =
-        filters.difficulty === 'all' || problem.difficulty === filters.difficulty;
-        const tagMatch =
-        filters.tag === 'all' || problem.tags === filters.tag;
-        const statusMatch =
-        filters.status === 'all' ||
-        (filters.status === 'solved' &&
-            solvedProblems.some((sp) => sp._id === problem._id));
-        return difficultyMatch && tagMatch && statusMatch;
-    });
+        {/* User menu */}
+        <div className="relative group">
+          <button className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/[0.05] transition-all duration-150">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold ring-1 ring-indigo-500/30">
+              {user?.firstName?.[0]?.toUpperCase() || 'G'}
+            </div>
+            <span className="hidden sm:inline">{user?.firstName || 'Guest'}</span>
+            <ChevronDown size={13} className="text-white/30" />
+          </button>
 
-    const solvedCount = solvedProblems.length;
-
-    /** { easy: N, medium: N, hard: N } counts across all problems. */
-    const difficultyCounts = problems.reduce((counts, problem) => {
-        counts[problem.difficulty] = (counts[problem.difficulty] || 0) + 1;
-        return counts;
-    }, {});
-
-    /** Completion percentage, capped at 100. */
-    const completionPct =
-        problems.length > 0
-        ? Math.round((solvedCount / problems.length) * 100)
-        : 0;
-
-    // ── Render ──────────────────────────────────────────────────────────────────
-
-    return (
-        <div className="min-h-screen bg-base-100">
-
-        {/* ── Navbar ── */}
-        <nav className="sticky top-0 z-30 flex items-center justify-between border-b border-base-300/60 bg-base-100/90 px-6 backdrop-blur-md h-14">
-
-            {/* Brand */}
-            <NavLink to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-content">
-                <Code2 size={15} />
-            </span>
-            AlgoGurukul
-            </NavLink>
-
-            {/* User menu */}
-            <div className="dropdown dropdown-end">
-            <div
-                tabIndex={0}
-                className="btn btn-ghost btn-sm flex items-center gap-2 normal-case font-medium"
+          {/* Dropdown */}
+          <div className="absolute right-0 top-full mt-1.5 w-44 origin-top-right scale-95 opacity-0 group-focus-within:scale-100 group-focus-within:opacity-100 transition-all duration-150 rounded-xl border border-white/[0.08] bg-[#0a0a0a] shadow-2xl shadow-black/60 p-1.5 z-50">
+              <NavLink
+                to="/dashboard"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+              >
+                <BarChart3 size={13} />
+                My progress
+              </NavLink>
+            
+              <NavLink
+                to="/admin"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+              >
+                <Shield size={13} />
+                Admin panel
+              </NavLink>
+            
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/[0.08] transition-colors"
             >
-                {/* Avatar circle with user initial */}
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold ring-1 ring-primary/20">
-                {user?.firstName?.[0]?.toUpperCase() || 'G'}
-                </div>
-                <span className="hidden sm:inline">{user?.firstName || 'Guest'}</span>
-                <ChevronDown size={14} className="text-base-content/40" />
-            </div>
-
-            <ul className="dropdown-content menu menu-sm mt-2 w-44 rounded-xl border border-base-300 bg-base-100 p-1.5 shadow-lg">
-                {/* Admin link — only shown to admins */}
-                {user?.role === 'admin' && (
-                <li>
-                    <NavLink to="/admin" className="gap-2 rounded-lg text-sm">
-                    <Shield size={14} />
-                    Admin panel
-                    </NavLink>
-                </li>
-                )}
-                <li>
-                <button
-                    onClick={handleLogout}
-                    className="gap-2 rounded-lg text-sm text-error/80 hover:text-error hover:bg-error/10"
-                >
-                    <LogOut size={14} />
-                    Log out
-                </button>
-                </li>
-            </ul>
-            </div>
-        </nav>
-
-        {/* ── Main ── */}
-        <main className="mx-auto w-full max-w-5xl px-4 py-8 lg:py-10">
-
-            {/* ── Hero grid: summary + difficulty breakdown ── */}
-            <section className="mb-6 grid gap-4 lg:grid-cols-[1fr_220px]">
-
-            {/* Left: headline + stat chips */}
-            <div className="rounded-2xl border border-base-300/60 bg-base-200/40 p-6">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-primary">
-                Practice dashboard
-                </p>
-                <h1 className="text-3xl font-bold tracking-tight">Problem Set</h1>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-base-content/55">
-                Filter by status, difficulty, and topic. Open any problem to code,
-                run examples, and use the AI helper.
-                </p>
-
-                {/* Stat chips */}
-                <div className="mt-5 flex flex-wrap gap-3">
-                <div className="rounded-xl border border-base-300/60 bg-base-100 px-4 py-3">
-                    <div className="text-2xl font-bold leading-none">{problems.length}</div>
-                    <div className="mt-1 text-[11px] text-base-content/45">Total problems</div>
-                </div>
-                <div className="rounded-xl border border-base-300/60 bg-base-100 px-4 py-3">
-                    <div className="text-2xl font-bold leading-none text-success">{solvedCount}</div>
-                    <div className="mt-1 text-[11px] text-base-content/45">Solved</div>
-                </div>
-                <div className="rounded-xl border border-base-300/60 bg-base-100 px-4 py-3">
-                    <div className="text-2xl font-bold leading-none text-base-content/70">
-                    {completionPct}%
-                    </div>
-                    <div className="mt-1 text-[11px] text-base-content/45">Completion</div>
-                </div>
-                </div>
-            </div>
-
-            {/* Right: difficulty breakdown with mini bars */}
-            <div className="rounded-2xl border border-base-300/60 bg-base-200/40 p-6">
-                <div className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-base-content/40">
-                <BarChart2 size={13} />
-                Difficulty mix
-                </div>
-
-                <div className="space-y-4">
-                {['easy', 'medium', 'hard'].map((level) => {
-                    const count = difficultyCounts[level] || 0;
-                    const pct   = problems.length > 0 ? (count / problems.length) * 100 : 0;
-                    return (
-                    <div key={level}>
-                        <div className="mb-1.5 flex items-center justify-between text-sm">
-                        <span className="capitalize font-medium text-base-content/70">{level}</span>
-                        <span className={`badge badge-sm ${getDifficultyBadgeColor(level)}`}>
-                            {count}
-                        </span>
-                        </div>
-                        {/* Mini progress bar */}
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-base-300/50">
-                        <div
-                            className={`h-full rounded-full ${getDifficultyBarColor(level)} transition-all duration-500`}
-                            style={{ width: `${pct}%` }}
-                        />
-                        </div>
-                    </div>
-                    );
-                })}
-                </div>
-            </div>
-            </section>
-
-            {/* ── Filter bar ── */}
-            <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-base-300/60 bg-base-200/40 px-4 py-3">
-            {/* Label */}
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-base-content/35 mr-1">
-                Filter
-            </span>
-
-            {/* Status filter */}
-            <select
-                className="select select-bordered select-sm min-w-[150px] rounded-lg bg-base-100 text-sm"
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            >
-                <option value="all">All problems</option>
-                <option value="solved">Solved only</option>
-            </select>
-
-            {/* Difficulty filter */}
-            <select
-                className="select select-bordered select-sm min-w-[150px] rounded-lg bg-base-100 text-sm"
-                value={filters.difficulty}
-                onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-            >
-                <option value="all">All difficulties</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-
-            {/* Tag filter */}
-            <select
-                className="select select-bordered select-sm min-w-[150px] rounded-lg bg-base-100 text-sm"
-                value={filters.tag}
-                onChange={(e) => setFilters({ ...filters, tag: e.target.value })}
-            >
-                <option value="all">All topics</option>
-                <option value="array">Array</option>
-                <option value="linkedList">Linked List</option>
-                <option value="graph">Graph</option>
-                <option value="dp">DP</option>
-                <option value="math">Math</option>
-            </select>
-
-            {/* Live result count */}
-            <span className="ml-auto text-[12px] text-base-content/40">
-                {filteredProblems.length} problem{filteredProblems.length !== 1 ? 's' : ''}
-            </span>
-            </div>
-
-            {/* ── Problem list ── */}
-            <div className="overflow-hidden rounded-2xl border border-base-300/60 bg-base-200/40">
-
-            {/* Column headings */}
-            <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-base-300/60 bg-base-100/60 px-5 py-3">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-base-content/30">Title</span>
-                <span className="hidden text-[10px] font-bold uppercase tracking-widest text-base-content/30 sm:block">Topic</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-base-content/30">Status</span>
-            </div>
-
-            {filteredProblems.length > 0 ? (
-                filteredProblems.map((problem) => {
-                const isSolved = solvedProblems.some((sp) => sp._id === problem._id);
-
-                return (
-                    <NavLink
-                    key={problem._id}
-                    to={`/problem/${problem._id}`}
-                    className="group grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-base-300/50 px-5 py-4 transition-colors hover:bg-base-100/70 last:border-b-0"
-                    >
-                    {/* Title + badges */}
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-2.5">
-                        {/* Coloured icon accent */}
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">
-                            <BookOpen size={14} />
-                        </span>
-                        <h2 className="truncate text-sm font-semibold">{problem.title}</h2>
-                        </div>
-
-                        {/* Difficulty + tag badges (tag only visible when tag col is hidden on mobile) */}
-                        <div className="mt-2 flex gap-2 pl-9">
-                        <div className={`badge badge-sm ${getDifficultyBadgeColor(problem.difficulty)}`}>
-                            {problem.difficulty}
-                        </div>
-                        <div className="badge badge-sm badge-outline sm:hidden">
-                            {problem.tags}
-                        </div>
-                        </div>
-                    </div>
-
-                    {/* Topic badge — hidden on small screens */}
-                    <div className="hidden sm:block">
-                        <span className="badge badge-outline badge-sm">{problem.tags}</span>
-                    </div>
-
-                    {/* Solved / Open status */}
-                    {isSolved ? (
-                        <div className="flex items-center gap-1.5 text-success text-xs font-semibold">
-                        <CheckCircle2 size={14} />
-                        Solved
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1.5 text-base-content/30 text-xs font-medium">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-base-content/20" />
-                        Open
-                        </div>
-                    )}
-                    </NavLink>
-                );
-                })
-            ) : (
-                /* Empty state */
-                <div className="flex flex-col items-center gap-3 px-4 py-16 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-base-300/40">
-                    <BookOpen size={22} className="text-base-content/30" />
-                </div>
-                <p className="text-sm font-medium text-base-content/50">
-                    No problems match those filters.
-                </p>
-                <button
-                    className="btn btn-xs btn-ghost text-primary"
-                    onClick={() => setFilters({ difficulty: 'all', tag: 'all', status: 'all' })}
-                >
-                    Clear all filters
-                </button>
-                </div>
-            )}
-            </div>
-        </main>
+              <LogOut size={13} />
+              Log out
+            </button>
+          </div>
         </div>
-    );
-    }
+      </nav>
 
-    export default Homepage;
+      {/* ── Main ── */}
+      <main className="mx-auto w-full max-w-7xl px-5 py-10">
+
+        {/* ── Problem set intro ──
+        <section className="relative mb-5 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#080808] p-6">
+            <div className="pointer-events-none absolute -top-16 -left-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-8 right-8 h-32 w-32 rounded-full bg-indigo-500/5 blur-2xl" />
+
+            <p className="relative mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
+              Practice Library
+            </p>
+            <h1 className="relative text-3xl font-bold tracking-tight text-white">
+              Problem Set
+            </h1>
+            <p className="relative mt-2 max-w-xl text-sm leading-relaxed text-white/35">
+              Filter by status, difficulty, and topic. Open any problem to code,
+              run examples, and use the AI helper.
+            </p>
+        </section> */}
+
+        {/* ── Filter bar ── */}
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.07] bg-[#080808] px-4 py-3">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/20 mr-1">
+            Filter
+          </span>
+
+          {[
+            {
+              value: filters.status,
+              onChange: (v) => setFilters({ ...filters, status: v }),
+              options: [
+                { value: 'all', label: 'All problems' },
+                { value: 'solved', label: 'Solved only' },
+              ],
+            },
+            {
+              value: filters.difficulty,
+              onChange: (v) => setFilters({ ...filters, difficulty: v }),
+              options: [
+                { value: 'all', label: 'All difficulties' },
+                { value: 'easy', label: 'Easy' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'hard', label: 'Hard' },
+              ],
+            },
+            {
+              value: filters.tag,
+              onChange: (v) => setFilters({ ...filters, tag: v }),
+              options: [
+                { value: 'all', label: 'All topics' },
+                { value: 'array', label: 'Array' },
+                { value: 'linkedList', label: 'Linked List' },
+                { value: 'graph', label: 'Graph' },
+                { value: 'dp', label: 'DP' },
+                { value: 'math', label: 'Math' },
+              ],
+            },
+          ].map((sel, i) => (
+            <select
+              key={i}
+              className="min-w-[148px] rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-sm text-white/70 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/40 transition-colors appearance-none cursor-pointer hover:border-white/15 hover:text-white"
+              value={sel.value}
+              onChange={(e) => sel.onChange(e.target.value)}
+            >
+              {sel.options.map((o) => (
+                <option key={o.value} value={o.value} className="bg-[#111] text-white">
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          ))}
+
+          <span className="ml-auto text-[11px] text-white/25 tabular-nums">
+            {filteredProblems.length} problem{filteredProblems.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+
+        {/* ── Problem list ── */}
+        <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-[#080808]">
+
+          {/* Column headings */}
+          <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-white/[0.06] bg-white/[0.02] px-5 py-3">
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/20">Title</span>
+            <span className="hidden text-[10px] font-bold uppercase tracking-[0.15em] text-white/20 sm:block">Topic</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/20">Status</span>
+          </div>
+
+          {filteredProblems.length > 0 ? (
+            filteredProblems.map((problem, idx) => {
+              const isSolved = solvedProblems.some((sp) => sp._id === problem._id);
+
+              return (
+                <NavLink
+                  key={problem._id}
+                  to={`/problem/${problem._id}`}
+                  className={`group grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-4 transition-all duration-150 hover:bg-white/[0.03] ${
+                    idx !== filteredProblems.length - 1 ? 'border-b border-white/[0.05]' : ''
+                  }`}
+                >
+                  {/* Title + badges */}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-500/15 transition-colors">
+                        <BookOpen size={13} />
+                      </span>
+                      <h2 className="truncate text-sm font-semibold text-white/85 group-hover:text-white transition-colors">
+                        {problem.title}
+                      </h2>
+                    </div>
+
+                    <div className="mt-2 flex gap-2 pl-10">
+                      <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold capitalize ${getDifficultyColor(problem.difficulty)}`}>
+                        {problem.difficulty}
+                      </span>
+                      <span className="inline-flex items-center rounded-md border border-white/[0.08] px-2 py-0.5 text-[10px] font-medium text-white/30 sm:hidden">
+                        {problem.tags}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Topic badge */}
+                  <div className="hidden sm:block">
+                    <span className="inline-flex items-center rounded-md border border-white/[0.08] px-2 py-0.5 text-[11px] font-medium text-white/30">
+                      {problem.tags}
+                    </span>
+                  </div>
+
+                  {/* Solved / Open */}
+                  {isSolved ? (
+                    <div className="flex items-center gap-1.5 text-indigo-400 text-[11px] font-semibold">
+                      <CheckCircle2 size={13} />
+                      Solved
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-white/20 text-[11px] font-medium">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-white/15" />
+                      Open
+                    </div>
+                  )}
+                </NavLink>
+              );
+            })
+          ) : (
+            /* Empty state */
+            <div className="flex flex-col items-center gap-3 px-4 py-16 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/[0.04] border border-white/[0.07]">
+                <BookOpen size={20} className="text-white/20" />
+              </div>
+              <p className="text-sm font-medium text-white/30">
+                No problems match those filters.
+              </p>
+              <button
+                className="mt-1 rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-400 hover:bg-indigo-500/10 transition-colors"
+                onClick={() => setFilters({ difficulty: 'all', tag: 'all', status: 'all' })}
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Homepage;

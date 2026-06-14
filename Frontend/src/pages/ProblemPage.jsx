@@ -4,15 +4,16 @@ import Editor from '@monaco-editor/react';
 import { NavLink, useParams } from 'react-router';
 import { useSelector } from 'react-redux';
 import axiosClient from "../utils/axiosClient"
-// import SubmissionHistory from "../components/SubmissionHistory"
+import SubmissionHistory from "../Components/SubmissionHistory"
 // import ChatAi from '../components/ChatAi';
 // import Editorial from '../components/Editorial';
 import { ArrowLeft, Bot, BookOpen, CheckCircle2, ClipboardList, Code2, FileText, Play, Send, Trophy } from 'lucide-react';
 
 const langMap = {
-        cpp: 'C++',
+        cpp: 'Cpp',
         java: 'Java',
-        javascript: 'JavaScript'
+        javascript: 'JavaScript',
+        python:"Python3"
 };
 
 const normalizeLanguage = (language = '') => language.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -20,7 +21,7 @@ const normalizeLanguage = (language = '') => language.toLowerCase().replace(/[^a
 const languageAliases = {
   cpp: ['cpp', 'c'],
   java: ['java'],
-  javascript: ['javascript', 'js']
+  javascript: ['javascript', 'js'],
 };
 
 const getStartCodeForLanguage = (startCode = [], selectedLanguage = 'javascript') => {
@@ -147,13 +148,19 @@ const ProblemPage = () => {
   };
 
   const getLanguageForMonaco = (lang) => {
-    switch (lang) {
-      case 'javascript': return 'javascript';
-      case 'java': return 'java';
-      case 'cpp': return 'cpp';
-      default: return 'javascript';
-    }
-  };
+  switch (lang) {
+    case "javascript":
+      return "javascript";
+    case "java":
+      return "java";
+    case "cpp":
+      return "cpp";
+    case "python":
+      return "python";
+    default:
+      return "javascript";
+  }
+};
 
   const getDifficultyBadgeColor = (difficulty = '') => {
     switch (difficulty.toLowerCase()) {
@@ -265,7 +272,7 @@ const ProblemPage = () => {
                           <div className="space-y-2 text-sm">
                             <div><strong>Input:</strong> {example.input}</div>
                             <div><strong>Output:</strong> {example.output}</div>
-                            <div><strong>Explanation:</strong> {example.explanation}</div>
+                            <div><strong>Explaination:</strong> {example.explaination}</div>
                           </div>
                         </div>
                       ))}
@@ -306,13 +313,13 @@ const ProblemPage = () => {
               {activeLeftTab === 'submissions' && (
                 <div>
                   <h2 className="text-xl font-bold mb-4">My Submissions</h2>
-                  {/* <div className="text-gray-500">
+                  <div className="text-gray-500">
                     {user?._id ? (
                       <SubmissionHistory problemId={problemId} />
                     ) : (
                       <p>Login to view your submissions.</p>
                     )}
-                  </div> */}
+                  </div>
                 </div>
               )}
 
@@ -477,8 +484,11 @@ const ProblemPage = () => {
                                 <div><strong>Input:</strong> {tc.stdin}</div>
                                 <div><strong>Expected:</strong> {tc.expected_output}</div>
                                 <div><strong>Output:</strong> {tc.stdout}</div>
+                                {(tc.stderr || tc.compile_output || tc.message) && (
+                                  <div><strong>Error:</strong> {tc.stderr || tc.compile_output || tc.message}</div>
+                                )}
                                 <div className={tc.status_id==3 ? 'text-green-600' : 'text-red-600'}>
-                                  {tc.status_id==3 ? 'Passed' : 'Failed'}
+                                  {tc.status?.description || (tc.status_id==3 ? 'Passed' : 'Failed')}
                                 </div>
                               </div>
                             </div>

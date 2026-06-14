@@ -173,6 +173,7 @@ const submissionMade = async(req,res)=>{
         const userId=req.result._id;
         const problemId = req.params.pid;
         const problemSubmissiions= await Submission.find({userId,problemId});
+        console.log(problemSubmissiions);
         res.status(200).send(problemSubmissiions);
     }
     catch(err){
