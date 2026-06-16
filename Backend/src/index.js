@@ -22,7 +22,11 @@ app.use("/problem", problemCreator);
 app.use("/submission",submitRouter);
 app.use("/ai",aiRouter);
 app.use("/video",videoRouter);
-
+app.use("/",(req,res)=>{
+  res.json({
+    message:"server running"
+  })
+})
 
 const initializeConnection = async () => {
   try {
