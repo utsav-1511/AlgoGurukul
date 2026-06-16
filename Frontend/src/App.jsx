@@ -12,6 +12,8 @@ import AdminCreate from "./Components/AdminCreate";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDelete from "./Components/AdminDelete";
+import AdminVideo from "./Components/AdminVideo";
+import AdminUpload from "./Components/AdminUpload";
 
 function AdminRoute({ user, children }) {
   const navigate = useNavigate();
@@ -50,7 +52,9 @@ if (loading) {
         <Route path="/admin" element={<AdminRoute user={user}><AdminPanel/></AdminRoute>}></Route>
         <Route path="/admin/dashboard" element={<AdminRoute user={user}><AdminDashboard/></AdminRoute>}></Route>
         <Route path="/admin/create" element={<AdminRoute user={user}><AdminCreate/></AdminRoute>}></Route>
-        <Route path="/admin/delete" element={<AdminRoute user={user}><AdminDelete/></AdminRoute>}></Route>
+        <Route path="/admin/delete/" element={<AdminRoute user={user}><AdminDelete/></AdminRoute>}></Route>
+        <Route path="/admin/video" element={<AdminRoute user={user}><AdminVideo/></AdminRoute>}></Route>
+        <Route path="/admin/upload/:problemId" element={<AdminRoute user={user}><AdminUpload/></AdminRoute>}></Route>
       </Routes>
     </>
   ) 

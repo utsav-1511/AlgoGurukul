@@ -8,7 +8,8 @@ const redisClient = require("./config/redis");
 const problemCreator = require("./routes/problemCreator");
 const submitRouter = require("./routes/submit");
 const cors = require("cors");
-
+const aiRouter = require("./routes/aiRouter");
+const  videoRouter =require("./routes/videoRouter")
 app.use(cors({
   origin: process.env.FRONTEND_URL|| true,
   credentials:true
@@ -19,6 +20,8 @@ app.use(cookieParser());
 app.use("/user", authRouter);
 app.use("/problem", problemCreator);
 app.use("/submission",submitRouter);
+app.use("/ai",aiRouter);
+app.use("/video",videoRouter);
 
 
 const initializeConnection = async () => {

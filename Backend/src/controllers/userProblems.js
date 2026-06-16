@@ -2,6 +2,7 @@ const {getLanguageId,submitBatch, submitToken} = require("../utils/problemUtilit
 const Problem = require("../models/problem");
 const User = require("../models/user");
 const Submission = require("../models/submission");
+const SolutionVideo = require("../models/solutionVideo");
 
 const createProblem=async (req, res)=>{
     const {title,description,difficulty,tags,visibleTestCases,hiddenTestCases,
@@ -127,11 +128,29 @@ const getProblemById = async(req,res)=>{
         if(!id){
             return  res.status(400).send("Id is missing");
         }
-        const getProblem =await Problem.findById(id,"title description difficulty tags visibleTestCases startCode referenceSolution");
-        if(!getProblem){
-            return res.status(404).send("Not Found in DB");
+        const problem = await Problem.findById(
+            id,
+            "title description difficulty tags visibleTestCases startCode referenceSolution"
+        );
+
+        if (!problem) {
+            return res.status(404).json({
+                error: "Problem not found"
+            });
         }
-        res.send(getProblem);
+
+        const result = problem.toObject();
+
+        const video = await SolutionVideo.findOne({ problemId: id });
+
+        if (video) {
+            result.secureUrl = video.secureUrl;
+            result.thumbnailUrl = video.thumbnailUrl;
+            result.cloudinaryPublicId = video.cloudinaryPublicId;
+            result.duration = video.duration;
+        }
+        console.log(result);
+        return res.status(200).json(result);
     }
     catch(err){
         res.status(500).send("Error "+err);

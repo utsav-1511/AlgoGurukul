@@ -5,8 +5,8 @@ import { NavLink, useParams } from 'react-router';
 import { useSelector } from 'react-redux';
 import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../Components/SubmissionHistory"
-// import ChatAi from '../components/ChatAi';
-// import Editorial from '../components/Editorial';
+import ChatAi from '../Components/ChatAi';
+import Editorial from '../Components/Editorial';
 import { ArrowLeft, Bot, BookOpen, CheckCircle2, ClipboardList, Code2, FileText, Play, Send, Trophy } from 'lucide-react';
 
 const langMap = {
@@ -35,7 +35,6 @@ const getLanguageKey = (language = '') => {
 };
 
 const getLanguageLabel = (language) => langMap[language] || language;
-
 
 const ProblemPage = () => {
   const [problem, setProblem] = useState(null);
@@ -325,10 +324,10 @@ const ProblemPage = () => {
 
               {activeLeftTab === 'chatAI' && (
                 <div className="prose max-w-none">
-                  {/* <h2 className="text-xl font-bold mb-4">CHAT with AI</h2>
+                  <h2 className="text-xl font-bold mb-4">CHAT with AI</h2>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    <ChatAi problem={problem}></ChatAi>
-                  </div> */}
+                    <ChatAi problem={problem} editorRef={editorRef}></ChatAi>
+                  </div>
                 </div>
               )}
             </>
@@ -546,3 +545,4 @@ const ProblemPage = () => {
 };
 
 export default ProblemPage;
+// export editorRef;
