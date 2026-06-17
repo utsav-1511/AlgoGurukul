@@ -44,10 +44,10 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-black px-4">
-        <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl shadow-lg">
+        <div className="min-h-screen flex items-center justify-center bg-[#121210] px-4 text-zinc-100">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-700 bg-[#242421] p-8 shadow-xl shadow-black/30">
             
-            <h2 className="text-3xl font-bold text-white text-center mb-6">
+            <h2 className="mb-6 text-center text-2xl font-semibold text-zinc-100">
             Login
             </h2>
 
@@ -59,11 +59,11 @@ const Login = () => {
                 type="email"
                 placeholder="Email"
                 {...register("emailId")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
 
                 {errors.emailId && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.emailId.message}
                 </p>
                 )}
@@ -75,11 +75,11 @@ const Login = () => {
                 type="password"
                 placeholder="Password"
                 {...register("password")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
 
                 {errors.password && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.password.message}
                 </p>
                 )}
@@ -88,13 +88,15 @@ const Login = () => {
             {/* Submit Button */}
             <button
                 type="submit"
-                className="w-full py-3 rounded-lg bg-white text-black font-semibold hover:bg-zinc-200 transition"
+                className="w-full rounded-lg bg-indigo-500 py-3 font-semibold text-white transition-colors hover:bg-indigo-400"
             >
                 Login
             </button>
 
             </form>
-            <p>Already Have an Account <Link to="/signup">Register</Link></p>
+            <p className="mt-4 text-sm text-zinc-400">
+              Already have an account <Link className="font-semibold text-indigo-400 hover:text-indigo-300" to="/signup">Register</Link>
+            </p>
         </div>
         </div>
     );

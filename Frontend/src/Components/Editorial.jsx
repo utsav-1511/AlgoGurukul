@@ -44,7 +44,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
 
   return (
     <div 
-      className="relative w-full max-w-2xl mx-auto rounded-xl overflow-hidden shadow-lg"
+      className="relative mx-auto w-full max-w-2xl overflow-hidden rounded-xl border border-zinc-700 bg-[#242421] shadow-lg shadow-black/20"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
@@ -54,7 +54,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
         src={secureUrl}
         poster={thumbnailUrl}
         onClick={togglePlayPause}
-        className="w-full aspect-video bg-black cursor-pointer"
+        className="aspect-video w-full cursor-pointer bg-[#121210]"
       />
       
       {/* Video Controls Overlay */}
@@ -66,7 +66,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
         {/* Play/Pause Button */}
         <button
           onClick={togglePlayPause}
-          className="btn btn-circle btn-primary mr-3"
+          className="btn btn-circle mr-3 border-zinc-700 bg-indigo-500 text-white hover:bg-indigo-400"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
@@ -91,7 +91,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                 videoRef.current.currentTime = Number(e.target.value);
               }
             }}
-            className="range range-primary range-xs flex-1"
+            className="range range-xs flex-1"
           />
           <span className="text-white text-sm ml-2">
             {formatTime(duration)}

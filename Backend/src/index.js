@@ -9,10 +9,14 @@ const problemCreator = require("./routes/problemCreator");
 const submitRouter = require("./routes/submit");
 const cors = require("cors");
 const aiRouter = require("./routes/aiRouter");
-const  videoRouter =require("./routes/videoRouter")
+const  videoRouter =require("./routes/videoRouter");
+
+
+//new line
+app.set("trust proxy", 1);
 app.use(cors({
-  origin: process.env.FRONTEND_URL|| true,
-  credentials:true
+  origin: true,
+  credentials: true
 }));
 
 app.use(express.json());

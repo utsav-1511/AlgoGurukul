@@ -59,13 +59,13 @@ const AdminDelete = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 text-zinc-100">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Delete Problems</h1>
+        <h1 className="text-3xl font-semibold">Delete Problems</h1>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
+        <table className="table w-full">
           <thead>
             <tr>
               <th className="w-1/12">#</th>
@@ -81,12 +81,12 @@ const AdminDelete = () => {
                 <th>{index + 1}</th>
                 <td>{problem.title}</td>
                 <td>
-                  <span className={`badge ${
-                    problem.difficulty === 'Easy' 
-                      ? 'badge-success' 
-                      : problem.difficulty === 'Medium' 
-                        ? 'badge-warning' 
-                        : 'badge-error'
+                    <span className={`badge ${
+                      problem.difficulty === 'Easy' 
+                        ? 'badge-success' 
+                        : problem.difficulty === 'Medium' 
+                          ? 'badge-warning' 
+                          : 'badge-error'
                   }`}>
                     {problem.difficulty}
                   </span>
@@ -100,7 +100,7 @@ const AdminDelete = () => {
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => handleDelete(problem._id)}
-                      className="btn btn-sm btn-error"
+                      className="btn btn-sm border-zinc-700 bg-rose-500 text-white hover:bg-rose-400"
                     >
                       Delete
                     </button>

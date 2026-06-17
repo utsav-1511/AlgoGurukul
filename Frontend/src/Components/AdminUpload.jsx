@@ -98,10 +98,10 @@ function AdminUpload(){
       };
     
       return (
-        <div className="max-w-md mx-auto p-6">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body">
-              <h2 className="card-title">Upload Video</h2>
+        <div className="mx-auto max-w-md p-6 text-zinc-100">
+          <div className="rounded-2xl border border-zinc-700 bg-[#242421] shadow-xl shadow-black/20">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold">Upload Video</h2>
               
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* File Input */}
@@ -128,7 +128,7 @@ function AdminUpload(){
                         }
                       }
                     })}
-                    className={`file-input file-input-bordered w-full ${errors.videoFile ? 'file-input-error' : ''}`}
+                  className={`file-input file-input-bordered w-full border-zinc-700 bg-[#2d2d2a] text-zinc-100 ${errors.videoFile ? 'file-input-error' : ''}`}
                     disabled={uploading}
                   />
                   {errors.videoFile && (
@@ -140,7 +140,7 @@ function AdminUpload(){
     
                 {/* Selected File Info */}
                 {selectedFile && (
-                  <div className="alert alert-info">
+                  <div className="rounded-xl border border-zinc-700 bg-[#2d2d2a] p-4">
                     <div>
                       <h3 className="font-bold">Selected File:</h3>
                       <p className="text-sm">{selectedFile.name}</p>
@@ -151,13 +151,13 @@ function AdminUpload(){
     
                 {/* Upload Progress */}
                 {uploading && (
-                  <div className="space-y-2">
+                    <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Uploading...</span>
                       <span>{uploadProgress}%</span>
                     </div>
                     <progress 
-                      className="progress progress-primary w-full" 
+                      className="progress w-full" 
                       value={uploadProgress} 
                       max="100"
                     ></progress>
@@ -166,14 +166,14 @@ function AdminUpload(){
     
                 {/* Error Message */}
                 {errors.root && (
-                  <div className="alert alert-error">
+                  <div className="rounded-xl border border-rose-900/50 bg-rose-950/40 p-4 text-rose-300">
                     <span>{errors.root.message}</span>
                   </div>
                 )}
     
                 {/* Success Message */}
                 {uploadedVideo && (
-                  <div className="alert alert-success">
+                  <div className="rounded-xl border border-emerald-900/50 bg-emerald-950/30 p-4 text-emerald-300">
                     <div>
                       <h3 className="font-bold">Upload Successful!</h3>
                       <p className="text-sm">Duration: {formatDuration(uploadedVideo.duration)}</p>
@@ -187,7 +187,7 @@ function AdminUpload(){
                   <button
                     type="submit"
                     disabled={uploading}
-                    className={`btn btn-primary ${uploading ? 'loading' : ''}`}
+                    className={`btn border-zinc-700 bg-indigo-500 text-white hover:bg-indigo-400 ${uploading ? 'loading' : ''}`}
                   >
                     {uploading ? 'Uploading...' : 'Upload Video'}
                   </button>

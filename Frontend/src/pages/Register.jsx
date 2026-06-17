@@ -73,9 +73,9 @@ const Register = () => {
         };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-black px-4">
-        <div className="w-full max-w-md bg-zinc-900 p-8 rounded-2xl shadow-lg">
-            <h2 className="text-3xl font-bold text-white text-center mb-6">
+        <div className="min-h-screen flex items-center justify-center bg-[#121210] px-4 text-zinc-100">
+        <div className="w-full max-w-md rounded-2xl border border-zinc-700 bg-[#242421] p-8 shadow-xl shadow-black/30">
+            <h2 className="mb-6 text-center text-2xl font-semibold text-zinc-100">
             Register
             </h2>
 
@@ -87,10 +87,10 @@ const Register = () => {
                 type="text"
                 placeholder="First Name"
                 {...register("firstName")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.firstName && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.firstName.message}
                 </p>
                 )}
@@ -102,10 +102,10 @@ const Register = () => {
                 type="text"
                 placeholder="Last Name"
                 {...register("lastName")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.lastName && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.lastName.message}
                 </p>
                 )}
@@ -117,10 +117,10 @@ const Register = () => {
                 type="email"
                 placeholder="Email"
                 {...register("emailId")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.emailId && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.emailId.message}
                 </p>
                 )}
@@ -132,10 +132,10 @@ const Register = () => {
                 type="number"
                 placeholder="Age"
                 {...register("age")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.age && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.age.message}
                 </p>
                 )}
@@ -147,10 +147,10 @@ const Register = () => {
                 type="password"
                 placeholder="Password"
                 {...register("password")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.password && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.password.message}
                 </p>
                 )}
@@ -162,10 +162,10 @@ const Register = () => {
                 type="password"
                 placeholder="Confirm Password"
                 {...register("confirmPassword")}
-                className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white border border-zinc-700 outline-none focus:border-white"
+                className="w-full rounded-lg border border-zinc-700 bg-[#2d2d2a] px-4 py-3 text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-zinc-500"
                 />
                 {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-rose-400">
                     {errors.confirmPassword.message}
                 </p>
                 )}
@@ -174,12 +174,14 @@ const Register = () => {
             {/* Submit Button */}
             <button
                 type="submit"
-                className="w-full py-3 rounded-lg bg-white text-black font-semibold hover:bg-zinc-200 transition"
+                className="w-full rounded-lg bg-indigo-500 py-3 font-semibold text-white transition-colors hover:bg-indigo-400"
             >
                 Register
             </button>
             </form>
-            <p>Already Have an Account <Link to="/signin">Login</Link></p>
+            <p className="mt-4 text-sm text-zinc-400">
+              Already have an account <Link className="font-semibold text-indigo-400 hover:text-indigo-300" to="/signin">Login</Link>
+            </p>
         </div>
         </div>
     );

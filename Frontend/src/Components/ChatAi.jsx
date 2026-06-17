@@ -51,14 +51,14 @@ function ChatAi({problem,editorRef}) {
     };
 
     return (
-        <div className="flex flex-col h-screen max-h-[80vh] min-h-[500px]">
+        <div className="flex h-screen min-h-[500px] max-h-[80vh] flex-col text-zinc-100">
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.map((msg, index) => (
                     <div 
                         key={index} 
                         className={`chat ${msg.role === "user" ? "chat-end" : "chat-start"}`}
                     >
-                        <div className="chat-bubble bg-base-200 text-base-content">
+                <div className="chat-bubble border border-zinc-700 bg-[#2d2d2a] text-zinc-100">
                             {msg.parts[0].text}
                         </div>
                     </div>
@@ -67,17 +67,17 @@ function ChatAi({problem,editorRef}) {
             </div>
             <form 
                 onSubmit={handleSubmit(onSubmit)} 
-                className="sticky bottom-0 p-4 bg-base-100 border-t"
+                className="sticky bottom-0 border-t border-zinc-700 bg-[#242421] p-4"
             >
                 <div className="flex items-center">
                     <input 
                         placeholder="Ask me anything" 
-                        className="input input-bordered flex-1" 
+                        className="input input-bordered flex-1 border-zinc-700 bg-[#2d2d2a] text-zinc-100 placeholder:text-zinc-500" 
                         {...register("message", { required: true, minLength: 2 })}
                     />
                     <button 
                         type="submit" 
-                        className="btn btn-ghost ml-2"
+                        className="btn ml-2 border-zinc-700 bg-indigo-500 text-white hover:bg-indigo-400"
                         disabled={errors.message}
                     >
                         <Send size={20} />

@@ -135,6 +135,7 @@ const ProblemPage = () => {
       });
 
        setSubmitResult(response.data);
+       console.log(response.data);
        setLoading(false);
        setActiveRightTab('result');
       
@@ -179,14 +180,14 @@ const ProblemPage = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-base-200">
-      <div className="flex h-14 items-center justify-between border-b border-base-300 bg-base-100/90 px-4 backdrop-blur">
-        <NavLink to="/" className="btn btn-ghost btn-sm gap-2">
+    <div className="flex h-screen flex-col bg-[#121210] text-zinc-100">
+      <div className="flex h-14 items-center justify-between border-b-2 border-zinc-700 bg-[#2d2d2a] px-4 backdrop-blur">
+        <NavLink to="/" className="btn btn-ghost btn-sm gap-2 text-zinc-100 hover:bg-zinc-800">
           <ArrowLeft size={18} />
           Problems
         </NavLink>
         <div className="min-w-0 text-center">
-          <div className="truncate text-sm font-semibold">{problem?.title || 'Problem'}</div>
+          <div className="truncate text-sm font-semibold text-zinc-100">{problem?.title || 'Problem'}</div>
           {problem && (
             <div className="mt-1 flex justify-center gap-2">
               <span className={`badge badge-xs ${getDifficultyBadgeColor(problem.difficulty)}`}>{problem.difficulty}</span>
@@ -197,34 +198,34 @@ const ProblemPage = () => {
         <div className="w-24" />
       </div>
 
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
+      <div className="flex min-h-0 flex-1 gap-3 bg-[#121210] p-3">
       {/* Left Panel */}
-      <div className="workspace-panel flex w-1/2 flex-col overflow-hidden rounded-lg border">
+      <div className="workspace-panel flex w-1/2 flex-col overflow-hidden rounded-lg border border-zinc-700 bg-[#242421] text-zinc-100">
         {/* Left Tabs */}
-        <div className="tabs bg-base-100 px-3 pt-2">
+        <div className="tabs bg-[#242421] px-3 pt-2">
           <button 
-            className={`tab gap-2 ${activeLeftTab === 'description' ? 'tab-active font-semibold text-primary' : ''}`}
+            className={`tab gap-2 text-zinc-300 ${activeLeftTab === 'description' ? 'tab-active font-semibold text-indigo-400' : ''}`}
             onClick={() => setActiveLeftTab('description')}
           >
             <FileText size={16} />
             Description
           </button>
           <button 
-            className={`tab gap-2 ${activeLeftTab === 'editorial' ? 'tab-active font-semibold text-primary' : ''}`}
+            className={`tab gap-2 text-zinc-300 ${activeLeftTab === 'editorial' ? 'tab-active font-semibold text-indigo-400' : ''}`}
             onClick={() => setActiveLeftTab('editorial')}
           >
             <BookOpen size={16} />
             Editorial
           </button>
           <button 
-            className={`tab gap-2 ${activeLeftTab === 'solutions' ? 'tab-active font-semibold text-primary' : ''}`}
+            className={`tab gap-2 text-zinc-300 ${activeLeftTab === 'solutions' ? 'tab-active font-semibold text-indigo-400' : ''}`}
             onClick={() => setActiveLeftTab('solutions')}
           >
             <Code2 size={16} />
             Solutions
           </button>
           <button 
-            className={`tab gap-2 ${activeLeftTab === 'submissions' ? 'tab-active font-semibold text-primary' : ''}`}
+            className={`tab gap-2 text-zinc-300 ${activeLeftTab === 'submissions' ? 'tab-active font-semibold text-indigo-400' : ''}`}
             onClick={() => setActiveLeftTab('submissions')}
           >
             <ClipboardList size={16} />
@@ -232,7 +233,7 @@ const ProblemPage = () => {
           </button>
 
           <button 
-            className={`tab gap-2 ${activeLeftTab === 'chatAI' ? 'tab-active font-semibold text-primary' : ''}`}
+            className={`tab gap-2 text-zinc-300 ${activeLeftTab === 'chatAI' ? 'tab-active font-semibold text-indigo-400' : ''}`}
             onClick={() => setActiveLeftTab('chatAI')}
           >
             <Bot size={16} />
@@ -515,16 +516,16 @@ const ProblemPage = () => {
                       <div>
                         <h4 className="font-bold text-lg">Accepted</h4>
                         <div className="mt-4 space-y-2">
-                          <p>Test Cases Passed: {submitResult.passedTestCases}/{submitResult.totalTestCases}</p>
+                          <p>Test Cases Passed: {submitResult.testCasesPassed}/{submitResult.testCasesTotal}</p>
                           <p>Runtime: {submitResult.runtime + " sec"}</p>
                           <p>Memory: {submitResult.memory + "KB"} </p>
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <h4 className="font-bold text-lg">{submitResult.error || 'Rejected'}</h4>
+                        <h4 className="font-bold text-lg">{submitResult.errorMessage || 'Rejected'}</h4>
                         <div className="mt-4 space-y-2">
-                          <p>Test Cases Passed: {submitResult.passedTestCases}/{submitResult.totalTestCases}</p>
+                          <p>Test Cases Passed: {submitResult.testCasesPassed}/{submitResult.testCasesTotal}</p>
                         </div>
                       </div>
                     )}

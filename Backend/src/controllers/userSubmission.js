@@ -2,96 +2,116 @@ const Problem = require("../models/problem");
 const Submission = require("../models/submission");
 const {getLanguageId,submitBatch,submitToken}  = require("../utils/problemUtility");
 
-const submitCode = async (req,res)=>{
-    try{
-        const userId = req.result._id; 
+const submitCode = async (req, res) => {
+    try {
+        const userId = req.result._id;
         const problemId = req.params.id;
+        const { language, code } = req.body;
 
-        const {language,code} = req.body;
-        // console.log(language,code);
-        if(!userId||!problemId||!code||!language){
-            res.status(404).send("Field Missing");
+        // Validation
+        if (!userId || !problemId || !code || !language) {
+            return res.status(400).send("Field Missing");
         }
-        const problem =await Problem.findById(problemId);
-        //testCases(Hidden);
+
+        const problem = await Problem.findById(problemId);
+
+        if (!problem) {
+            return res.status(404).send("Problem Not Found");
+        }
+
         const submitted = await Submission.create({
-            userId:userId,
-            problemId:problemId,
-            languages:language,
-            code:code,  
-            status:"pending",
-            testCasesTotal:problem.hiddenTestCases.length
-        })
-        // console.log(submitted,"hi");
-        //send result to judge0
+            userId,
+            problemId,
+            languages: language,
+            code,
+            status: "pending",
+            testCasesTotal: problem.hiddenTestCases.length
+        });
+
         const languageId = getLanguageId(language);
-        // console.log(languageId)
-        const submission = problem.hiddenTestCases.map((testcase)=>({
-                source_code:code,
-                language_id: languageId,
-                stdin:testcase.input,
-                expected_output:testcase.output
-        }
-        ));
+
+        const submission = problem.hiddenTestCases.map((testcase) => ({
+            source_code: code,
+            language_id: languageId,
+            stdin: testcase.input,
+            expected_output: testcase.output
+        }));
 
         const submitResult = await submitBatch(submission);
-        console.log(submitResult);
 
-        const returnToken = await submitResult.map((value)=>value.token);
-        // console.log(returnToken);
+        const returnToken = submitResult.map((value) => value.token);
 
         const testResult = await submitToken(returnToken);
-        // console.log(testResult);
 
-        let runtime =0;
+        let runtime = 0;
         let memory = 0;
-        let testCasesPassed=0;
+        let testCasesPassed = 0;
         let status = "accepted";
         let errorMessage = null;
-        for(const test of testResult){
-            if(test.status_id == 3){
+
+        for (const test of testResult) {
+            if (test.status_id === 3) {
                 testCasesPassed++;
-                runtime += parseFloat(test.time);
-                memory = Math.max(memory,test.memory)
-            }else{
-                if(test.status_id==4){
+                runtime += parseFloat(test.time || 0);
+                memory = Math.max(memory, test.memory || 0);
+            } else {
+                if (test.status_id === 4) {
+                    status = "wrong";
+                    errorMessage =
+                        test.stderr ||
+                        test.compile_output ||
+                        test.message ||
+                        "Wrong Answer";
+                } else {
                     status = "error";
-                    errorMessage= test.stderr;
+                    errorMessage = test.stderr;
                 }
-                else{
-                    status:"wrong";
-                    errorMessage= test.stderr;
-                }
-
+                // No need to check remaining test cases once failed
+                break;
             }
         }
-        submitted.status=status;
-        submitted.runtime= runtime;
-        submitted.memory=memory;
-        submitted.errorMessage=errorMessage;
-        submitted.testCasesPassed=testCasesPassed;
+
+        submitted.status = status;
+        submitted.runtime = runtime;
+        submitted.memory = memory;
+        submitted.errorMessage = errorMessage;
+        submitted.testCasesPassed = testCasesPassed;
+
         await submitted.save();
-
-        if(!req.result.problemSolved.includes(problemId)){
+        console.log(submitted);
+        // Add solved problem only if accepted
+        if (
+            status === "accepted" &&
+            !req.result.problemSolved.includes(problemId)
+        ) {
             req.result.problemSolved.push(problemId);
-            await req.result.save()
+            await req.result.save();
         }
-        const accepted = (status="accepted");
-        res.status(201).json(
-            {
-                accepted,
-                testCasesTotal:problem.hiddenTestCases.length,
-                testCasesPassed,
-                runtime,
-                memory
-            }
-        );
 
+        const accepted = status === "accepted";
+
+        return res.status(201).json({
+            accepted,
+            status,
+            testCasesTotal: problem.hiddenTestCases.length,
+            testCasesPassed,
+            runtime,
+            memory,
+            errorMessage
+        });
+    } catch (err) {
+        console.error(err);
+
+        if (res.headersSent) {
+            return;
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        });
     }
-    catch(err){
-        res.status(500).send("Error "+err);
-    }
-}
+};
 
 const runCode = async(req,res)=>{
 
@@ -101,7 +121,7 @@ const runCode = async(req,res)=>{
 
         const {language,code} = req.body;
         if(!userId||!problemId||!code||!language){
-            res.status(404).send("Field Missing");
+            return res.status(404).send("Field Missing");
         }
         const problem =await Problem.findById(problemId);
         const languageId = getLanguageId(language);
@@ -118,42 +138,51 @@ const runCode = async(req,res)=>{
         const returnToken = await submitResult.map((value)=>value.token);
 
         const testResult = await submitToken(returnToken);
-        // const accepted = (status="accepted");
-        let runtime =0;
+        let runtime = 0;
         let memory = 0;
-        let testCasesPassed=0;
+        let testCasesPassed = 0;
         let status = "accepted";
         let errorMessage = null;
-        for(const test of testResult){
-            if(test.status_id == 3){
-                testCasesPassed++;
-                runtime += parseFloat(test.time);
-                memory = Math.max(memory,test.memory)
-            }else{
-                if(test.status_id==4){
-                    status = "error";
-                    errorMessage= test.stderr;
-                }
-                else{
-                    status:"wrong";
-                    errorMessage= test.stderr;
-                }
 
+        for (const test of testResult) {
+            if (test.status_id === 3) {
+                testCasesPassed++;
+                runtime += parseFloat(test.time || 0);
+                memory = Math.max(memory, test.memory || 0);
+            } else {
+                if (test.status_id === 4) {
+                    status = "wrong";
+                    errorMessage =
+                        test.stderr ||
+                        test.compile_output ||
+                        test.message ||
+                        "Wrong Answer";
+                } else {
+                    status = "error";
+                    errorMessage = test.stderr;
+                }
             }
         }
-        
-        res.status(201).json(
-            {
-                success:status,
-                testCases:testResult,
-                runtime,
-                memory
-            }
-        );
-        res.status(201).send(testResult);
+
+        const accepted = status === "accepted";
+
+        return res.status(201).json({
+            accepted,
+            status,
+            testCasesPassed,
+            totalTestCases: problem.visibleTestCases.length,
+            testCases: testResult,
+            runtime,
+            memory,
+            errorMessage
+        });
     }
     catch(err){
-        res.status(500).send("Error "+err)
+        if(res.headersSent){
+            return;
+        }
+
+        return res.status(500).send("Error " + err.message);
     }
     
 }

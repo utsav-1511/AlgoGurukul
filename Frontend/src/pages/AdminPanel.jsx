@@ -51,14 +51,14 @@ function AdminPanel() {
   ];
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-[#121210] text-zinc-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-base-content mb-4">
+          <h1 className="mb-4 text-3xl font-semibold text-zinc-100">
             Admin Panel
           </h1>
-          <p className="text-base-content/70 text-lg">
+          <p className="text-lg text-zinc-400">
             Manage coding problems on your platform
           </p>
         </div>
@@ -70,35 +70,31 @@ function AdminPanel() {
             return (
               <div
                 key={option.id}
-                className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer"
+                className="cursor-pointer rounded-2xl border border-zinc-700 bg-[#242421] shadow-xl shadow-black/20 transition-all duration-300 hover:-translate-y-2 hover:border-zinc-500"
               >
-                <div className="card-body items-center text-center p-8">
+                <div className="items-center p-8 text-center">
                   {/* Icon */}
-                  <div className={`${option.bgColor} p-4 rounded-full mb-4`}>
-                    <IconComponent size={32} className="text-base-content" />
+                  <div className="mb-4 rounded-full bg-indigo-500/10 p-4">
+                    <IconComponent size={32} className="text-indigo-400" />
                   </div>
                   
                   {/* Title */}
-                  <h2 className="card-title text-xl mb-2">
+                  <h2 className="mb-2 text-xl font-semibold text-zinc-100">
                     {option.title}
                   </h2>
                   
                   {/* Description */}
-                  <p className="text-base-content/70 mb-6">
+                  <p className="mb-6 text-zinc-400">
                     {option.description}
                   </p>
                   
                   {/* Action Button */}
-                  <div className="card-actions">
-                    <div className="card-actions">
                     <NavLink 
                     to={option.route}
-                   className={`btn ${option.color} btn-wide`}
+                   className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-500 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-400"
                    >
                    {option.title}
                    </NavLink>
-                   </div>
-                  </div>
                 </div>
               </div>
             );

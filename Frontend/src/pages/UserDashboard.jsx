@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router';
-import { useSelector } from 'react-redux';
 import {
   ArrowLeft,
   BarChart3,
@@ -14,13 +13,15 @@ import {
   Trophy,
 } from 'lucide-react';
 import axiosClient from '../utils/axiosClient';
+import ProfilePanel from './ProfilePanel';
 
 // ─── Constants (unchanged) ────────────────────────────────────────────────────
 
+
 const DIFFICULTIES = [
-  { key: 'easy',   color: 'bg-emerald-400', text: 'text-emerald-400', rail: 'bg-emerald-400' },
-  { key: 'medium', color: 'bg-amber-400',   text: 'text-amber-400',   rail: 'bg-amber-400'   },
-  { key: 'hard',   color: 'bg-rose-400',    text: 'text-rose-400',    rail: 'bg-rose-400'    },
+  { key: 'easy',   color: 'bg-emerald-400', text: 'text-emerald-400' },
+  { key: 'medium', color: 'bg-amber-400',   text: 'text-amber-400'   },
+  { key: 'hard',   color: 'bg-rose-400',    text: 'text-rose-400'    },
 ];
 
 const TOPICS = ['array', 'linkedList', 'graph', 'dp', 'math'];
@@ -139,8 +140,6 @@ function TopicCard({ topic, solved, total, loading }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 function UserDashboard() {
-  const { user } = useSelector((state) => state.auth);
-
   // ── State (unchanged) ────────────────────────────────────────────────────────
   const [problems, setProblems]         = useState([]);
   const [solvedProblems, setSolvedProblems] = useState([]);
@@ -205,27 +204,14 @@ function UserDashboard() {
   );
 
   const solvedCount    = solvedDetails.length;
-  const completion     = problems.length ? Math.round((solvedCount / problems.length) * 100) : 0;
-  const remaining      = Math.max(problems.length - solvedCount, 0);
   const strongestTopic = [...topicProgress].sort((a, b) => b.solved - a.solved)[0];
-
-  // ── Rail segments: proportion of each difficulty within solved set ────────────
-  const railSegments = useMemo(() => {
-    if (!problems.length) return [];
-    return difficultyProgress.map(({ key, rail, total }) => ({
-      key,
-      rail,
-      width: problems.length ? (total / problems.length) * 100 : 0,
-      solvedWidth: problems.length ? (difficultyProgress.find(d => d.key === key)?.solved ?? 0) / problems.length * 100 : 0,
-    }));
-  }, [problems, difficultyProgress]);
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-[#121210] text-zinc-100">
 
       {/* ── Header / Nav ────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-20 border-b border-zinc-900 bg-zinc-950/90 backdrop-blur-sm">
+      <header className="sticky top-0 z-20 border-b-2 border-zinc-700 bg-[#2d2d2a]">
         <div className="mx-auto flex h-13 max-w-6xl items-center justify-between px-5">
 
           {/* Left: back + brand */}
@@ -233,12 +219,12 @@ function UserDashboard() {
             <NavLink
               to="/"
               aria-label="Back to problems"
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-800 text-zinc-500 transition-colors hover:border-zinc-700 hover:text-zinc-300"
+              className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-700 text-zinc-500 transition-colors hover:border-zinc-500 hover:text-zinc-300"
             >
               <ArrowLeft size={14} aria-hidden="true" />
             </NavLink>
             <div className="hidden sm:block h-4 w-px bg-zinc-800" aria-hidden="true" />
-            <span className="hidden sm:block text-sm font-medium text-zinc-400">
+            <span className="hidden sm:block text-sm font-medium text-zinc-300">
               Progress
             </span>
           </div>
@@ -260,88 +246,14 @@ function UserDashboard() {
         {error && (
           <div
             role="alert"
-            className="rounded-lg border border-rose-900/50 bg-rose-950/40 px-4 py-3 text-sm text-rose-400"
+              className="rounded-lg border border-rose-900/50 bg-rose-950/40 px-4 py-3 text-sm text-rose-400"
           >
             {error}
           </div>
         )}
 
-        {/* ── Profile + Completion Rail ────────────────────────────────────── */}
-        <Card className="px-6 py-5">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
-            {/* Avatar + name */}
-            <div className="flex items-center gap-4">
-              <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-lg font-semibold text-indigo-400 ring-1 ring-indigo-500/20"
-                aria-hidden="true"
-              >
-                {user?.firstName?.[0]?.toUpperCase() ?? 'G'}
-              </div>
-              <div>
-                <h1 className="text-base font-semibold text-zinc-100">
-                  {user?.firstName ?? 'Learner'}
-                </h1>
-                <p className="text-sm text-zinc-500">
-                  {loading ? (
-                    <Skeleton className="inline-block h-3.5 w-24 align-middle" />
-                  ) : (
-                    `${solvedCount} of ${problems.length} problems solved`
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* Completion percentage */}
-            <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-                Completion
-              </p>
-              {loading ? (
-                <Skeleton className="mt-1 h-8 w-14 ml-auto" />
-              ) : (
-                <p className="mt-0.5 text-3xl font-bold tabular-nums text-zinc-100">
-                  {completion}
-                  <span className="text-xl font-medium text-zinc-500">%</span>
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* ── Signature element: segmented completion rail ──────────────── */}
-          <div className="mt-5">
-            <div
-              className="flex h-2 w-full overflow-hidden rounded-full bg-zinc-900"
-              role="img"
-              aria-label={`Completion: ${completion}% — easy ${difficultyProgress[0]?.solved ?? 0}, medium ${difficultyProgress[1]?.solved ?? 0}, hard ${difficultyProgress[2]?.solved ?? 0}`}
-            >
-              {!loading && railSegments.map(({ key, rail, solvedWidth }) => (
-                <div
-                  key={key}
-                  className={`h-full ${rail} first:rounded-l-full last:rounded-r-full`}
-                  style={{ width: `${solvedWidth}%` }}
-                />
-              ))}
-            </div>
-            {/* Rail legend */}
-            <div className="mt-2.5 flex items-center gap-4">
-              {difficultyProgress.map(({ key, text, solved }) => (
-                <span key={key} className="flex items-center gap-1.5 text-[11px] text-zinc-600">
-                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${
-                    key === 'easy' ? 'bg-emerald-400' : key === 'medium' ? 'bg-amber-400' : 'bg-rose-400'
-                  }`} aria-hidden="true" />
-                  <span className="capitalize">{key}</span>
-                  {!loading && (
-                    <span className={`font-semibold tabular-nums ${text}`}>{solved}</span>
-                  )}
-                </span>
-              ))}
-              <span className="ml-auto text-[11px] text-zinc-700 tabular-nums">
-                {!loading && `${remaining} remaining`}
-              </span>
-            </div>
-          </div>
-        </Card>
+      {/* ── Profile ──────────────────────────────────────────────────────── */}
+        <ProfilePanel />
 
         {/* ── Stat strip ──────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

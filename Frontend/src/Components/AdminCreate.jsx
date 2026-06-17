@@ -125,8 +125,8 @@ function AdminCreate() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-8">
+    <div className="mx-auto max-w-7xl p-6 text-zinc-100">
+      <h1 className="mb-8 text-3xl font-semibold">
         Create Problem
       </h1>
 
@@ -136,8 +136,8 @@ function AdminCreate() {
       >
         {/* BASIC INFO */}
 
-        <div className="card bg-base-100 shadow-xl p-6">
-          <h2 className="text-2xl font-semibold mb-6">
+        <div className="rounded-2xl border border-zinc-700 bg-[#242421] p-6 shadow-xl shadow-black/20">
+          <h2 className="mb-6 text-2xl font-semibold text-zinc-100">
             Basic Information
           </h2>
 

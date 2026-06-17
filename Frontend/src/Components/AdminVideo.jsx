@@ -60,13 +60,13 @@ const AdminVideo = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 text-zinc-100">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Video Upload and Delete</h1>
+        <h1 className="text-3xl font-semibold">Video Upload and Delete</h1>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
+        <table className="table w-full">
           <thead>
             <tr>
               <th className="w-1/12">#</th>
@@ -101,7 +101,7 @@ const AdminVideo = () => {
                   <div className="flex space-x-1">
                      <NavLink 
                         to={`/admin/upload/${problem._id}`}
-                        className={`btn bg-blue-600`}
+                        className="btn border-zinc-700 bg-indigo-500 text-white hover:bg-indigo-400"
                         >
                         Upload
                     </NavLink>
@@ -111,7 +111,7 @@ const AdminVideo = () => {
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => handleDelete(problem._id)}
-                      className="btn btn-sm btn-error"
+                      className="btn btn-sm border-zinc-700 bg-rose-500 text-white hover:bg-rose-400"
                     >
                       Delete
                     </button>

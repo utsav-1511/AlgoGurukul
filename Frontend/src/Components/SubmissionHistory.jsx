@@ -67,11 +67,11 @@ const SubmissionHistory = ({ problemId }) => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-6 text-center">Submission History</h2>
+    <div className="container mx-auto p-4 text-zinc-100">
+      <h2 className="mb-6 text-center text-xl font-semibold sm:text-2xl">Submission History</h2>
       
       {submissions.length === 0 ? (
-        <div className="alert alert-info shadow-lg">
+        <div className="rounded-2xl border border-zinc-700 bg-[#242421] p-4 text-zinc-300">
           <div>
             <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -82,10 +82,10 @@ const SubmissionHistory = ({ problemId }) => {
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="table table-zebra w-full">
+            <table className="table w-full">
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th>S. No.</th>
                   <th>Language</th>
                   <th>Status</th>
                   <th>Runtime</th>
@@ -98,7 +98,7 @@ const SubmissionHistory = ({ problemId }) => {
               <tbody>
                 {submissions.map((sub, index) => (
                   <tr key={sub._id}>
-                    <td>{index + 1}</td>
+                    <td>{sub.serialNumber ?? index + 1}</td>
                     <td className="font-mono">{sub.languages}</td>
                     <td>
                       <span className={`badge ${getStatusColor(sub.status)}`}>
@@ -124,7 +124,7 @@ const SubmissionHistory = ({ problemId }) => {
             </table>
           </div>
 
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-zinc-500">
             Showing {submissions.length} submissions
           </p>
         </>
@@ -133,8 +133,8 @@ const SubmissionHistory = ({ problemId }) => {
       {/* Code View Modal */}
       {selectedSubmission && (
         <div className="modal modal-open">
-          <div className="modal-box w-11/12 max-w-5xl">
-            <h3 className="font-bold text-lg mb-4">
+          <div className="modal-box w-11/12 max-w-5xl rounded-2xl border border-zinc-700 bg-[#242421] text-zinc-100">
+            <h3 className="mb-4 text-lg font-semibold">
               Submission Details: {selectedSubmission.language}
             </h3>
             
@@ -163,7 +163,7 @@ const SubmissionHistory = ({ problemId }) => {
               )}
             </div>
             
-            <pre className="p-4 bg-gray-900 text-gray-100 rounded overflow-x-auto">
+            <pre className="overflow-x-auto rounded bg-[#121210] p-4 text-zinc-100">
               <code>{selectedSubmission.code}</code>
             </pre>
             

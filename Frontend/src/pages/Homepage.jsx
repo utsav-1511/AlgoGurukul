@@ -4,99 +4,142 @@ import { useDispatch, useSelector } from 'react-redux';
 import axiosClient from '../utils/axiosClient';
 import { logoutUser } from '../authSlice';
 import {
-  BookOpen, CheckCircle2, Code2, LogOut,
-  Shield, ChevronDown, BarChart3, Circle,
+  ChevronDown, LogOut, Search, Shield,
+  BarChart3, User,
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const DIFFICULTY_STYLES = {
-  easy:   'text-emerald-400 bg-emerald-400/[0.08] ring-1 ring-emerald-400/20',
-  medium: 'text-amber-400  bg-amber-400/[0.08]  ring-1 ring-amber-400/20',
-  hard:   'text-rose-400   bg-rose-400/[0.08]   ring-1 ring-rose-400/20',
+const DIFFICULTY_BADGES = {
+  easy:   'text-green-500 bg-green-500/10',
+  medium: 'text-amber-500 bg-amber-500/10',
+  hard:   'text-red-500   bg-red-500/10',
 };
 
-const getDifficultyStyle = (difficulty = '') =>
-  DIFFICULTY_STYLES[difficulty.toLowerCase()] ?? 'text-zinc-500 bg-zinc-500/[0.08] ring-1 ring-zinc-500/20';
+const getDifficultyBadge = (difficulty = '') =>
+  DIFFICULTY_BADGES[difficulty.toLowerCase()] ?? 'text-zinc-500 bg-zinc-500/10';
+
+const formatDifficulty = (difficulty = '') =>
+  difficulty.toLowerCase() === 'medium'
+    ? 'Med.'
+    : difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+
+const formatTopic = (topic = '') =>
+  topic === 'linkedList'
+    ? 'Linked List'
+    : topic.charAt(0).toUpperCase() + topic.slice(1);
+
+const getAcceptanceDisplay = (problem) => {
+  const value = problem.acceptanceRate ?? problem.acceptance;
+  if (typeof value !== 'number') return '--';
+  return `${value.toFixed(1)}%`;
+};
+
+// ─── Logo Mark ────────────────────────────────────────────────────────────────
+
+function LogoMark({ size = 32 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 34 34"
+      role="img"
+      aria-label="AlgoGurukul"
+    >
+      <rect width="34" height="34" rx="8" fill="#6366f1" />
+      <polyline
+        points="9,24 17,10 25,24"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <line
+        x1="11.5" y1="19.5" x2="22.5" y2="19.5"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <circle cx="17" cy="24" r="2.2" fill="#a5f3fc" />
+    </svg>
+  );
+}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-/** A single filter pill group (All / option / option …) */
-function FilterGroup({ label, value, options, onChange }) {
+function TopicPill({ active, label, count, onClick }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-600 mr-0.5 hidden sm:inline">
-        {label}
-      </span>
-      <div className="flex items-center gap-0.5 rounded-lg bg-zinc-900 p-0.5 ring-1 ring-zinc-800">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
-            className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-100 ${
-              value === opt.value
-                ? 'bg-zinc-700 text-zinc-100 shadow-sm'
-                : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+        active
+          ? 'border-zinc-500 bg-[#242421] text-zinc-50'
+          : 'border-zinc-700 bg-[#121210] text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+      }`}
+    >
+      {label}
+      {typeof count === 'number' && (
+        <span className="font-mono text-[10px] text-zinc-600">{count}</span>
+      )}
+    </button>
+  );
+}
+
+function PillGroup({ value, options, onChange }) {
+  return (
+    <div className="flex items-center gap-0.5 rounded-lg border border-zinc-700 bg-[#1a1a17] p-1">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+            value === option.value
+              ? 'bg-[#2d2d2a] text-zinc-100 ring-1 ring-zinc-600'
+              : 'text-zinc-500 hover:text-zinc-300'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }
 
-/** Mobile-friendly native select fallback */
-function FilterSelect({ value, options, onChange }) {
-  return (
-    <select
-      className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1.5 text-[11px] font-medium text-zinc-300 focus:outline-none focus:ring-1 focus:ring-indigo-500/40 appearance-none cursor-pointer"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value} className="bg-zinc-950">
-          {o.label}
-        </option>
-      ))}
-    </select>
+function StatusDot({ solved }) {
+  return solved ? (
+    <span
+      className="mx-auto block h-2 w-2 rounded-full bg-green-500"
+      aria-label="Solved"
+      role="img"
+    />
+  ) : (
+    <span
+      className="mx-auto block h-2 w-2 rounded-full border border-zinc-600"
+      aria-label="Open"
+      role="img"
+    />
   );
 }
 
-/** Solved / Open status cell */
-function StatusCell({ solved }) {
-  if (solved) {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-        <CheckCircle2 size={12} strokeWidth={2.5} />
-        Solved
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-600">
-      <Circle size={10} strokeWidth={2} />
-      Open
-    </span>
-  );
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const FILTER_DEFS = {
   status: [
     { value: 'all',    label: 'All'    },
     { value: 'solved', label: 'Solved' },
+    { value: 'open',   label: 'Open'   },
   ],
   difficulty: [
     { value: 'all',    label: 'All'    },
     { value: 'easy',   label: 'Easy'   },
-    { value: 'medium', label: 'Medium' },
+    { value: 'medium', label: 'Med.'   },
     { value: 'hard',   label: 'Hard'   },
   ],
   tag: [
-    { value: 'all',        label: 'All'         },
+    { value: 'all',        label: 'All Topics'  },
     { value: 'array',      label: 'Array'       },
     { value: 'linkedList', label: 'Linked List' },
     { value: 'graph',      label: 'Graph'       },
@@ -105,31 +148,32 @@ const FILTER_DEFS = {
   ],
 };
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 function Homepage() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  // ── State (unchanged) ────────────────────────────────────────────────────────
-  const [problems, setProblems]             = useState([]);
+  const [problems, setProblems]         = useState([]);
   const [solvedProblems, setSolvedProblems] = useState([]);
-  const [filters, setFilters]               = useState({
+  const [filters, setFilters]           = useState({
     difficulty: 'all',
     tag:        'all',
     status:     'all',
   });
-
-  // Dropdown open/close via useState (replaces fragile group-focus-within hack)
+  const [searchQuery, setSearchQuery]   = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef                     = useRef(null);
 
-  // ── Side effects (unchanged logic) ──────────────────────────────────────────
+  // ── Effects ──────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const fetchProblems = async () => {
       try {
         const { data } = await axiosClient.get('/problem/getAllProblem');
         setProblems(data);
-      } catch (error) {
-        console.error('Error fetching problems:', error);
+      } catch (err) {
+        console.error('Error fetching problems:', err);
       }
     };
 
@@ -137,8 +181,8 @@ function Homepage() {
       try {
         const { data } = await axiosClient.get('/problem/problemSolvedByUser');
         setSolvedProblems(data);
-      } catch (error) {
-        console.error('Error fetching solved problems:', error);
+      } catch (err) {
+        console.error('Error fetching solved problems:', err);
       }
     };
 
@@ -146,7 +190,6 @@ function Homepage() {
     if (user?._id) fetchSolvedProblems();
   }, [user]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -157,275 +200,317 @@ function Homepage() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // ── Handlers (unchanged) ─────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────────
+
   const handleLogout = () => {
     dispatch(logoutUser());
     setSolvedProblems([]);
     setDropdownOpen(false);
   };
 
-  const setFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+  const setFilter = (key, value) =>
+    setFilters((prev) => ({ ...prev, [key]: value }));
 
-  const clearFilters = () => setFilters({ difficulty: 'all', tag: 'all', status: 'all' });
+  const clearFilters = () => {
+    setFilters({ difficulty: 'all', tag: 'all', status: 'all' });
+    setSearchQuery('');
+  };
 
-  // ── Derived data (unchanged) ─────────────────────────────────────────────────
+  // ── Derived ──────────────────────────────────────────────────────────────────
+
   const filteredProblems = problems.filter((problem) => {
-    const difficultyMatch =
-      filters.difficulty === 'all' || problem.difficulty === filters.difficulty;
-    const tagMatch =
-      filters.tag === 'all' || problem.tags === filters.tag;
-    const statusMatch =
-      filters.status === 'all' ||
-      (filters.status === 'solved' &&
-        solvedProblems.some((sp) => sp._id === problem._id));
-    return difficultyMatch && tagMatch && statusMatch;
+    const q = searchQuery.trim().toLowerCase();
+    if (q && !problem.title?.toLowerCase().includes(q)) return false;
+    if (filters.difficulty !== 'all' && problem.difficulty !== filters.difficulty) return false;
+    if (filters.tag !== 'all' && problem.tags !== filters.tag) return false;
+    const isSolved = solvedProblems.some((sp) => sp._id === problem._id);
+    if (filters.status === 'solved' && !isSolved) return false;
+    if (filters.status === 'open'   &&  isSolved) return false;
+    return true;
   });
 
   const isFiltered =
-    filters.difficulty !== 'all' || filters.tag !== 'all' || filters.status !== 'all';
+    filters.difficulty !== 'all' ||
+    filters.tag        !== 'all' ||
+    filters.status     !== 'all' ||
+    searchQuery.trim() !== '';
+
+  const tagCounts = FILTER_DEFS.tag.reduce((acc, tag) => {
+    acc[tag.value] =
+      tag.value === 'all'
+        ? problems.length
+        : problems.filter((p) => p.tags === tag.value).length;
+    return acc;
+  }, {});
+
+  const initials = user?.firstName?.[0]?.toUpperCase() ?? 'G';
 
   // ── Render ───────────────────────────────────────────────────────────────────
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
 
-      {/* ── Navbar ────────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 border-b border-zinc-900 bg-zinc-950/90 backdrop-blur-sm">
+  return (
+    <div className="min-h-screen bg-[#121210] text-zinc-100">
+
+      {/* ── Navbar ──────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-30 border-b border-zinc-800 bg-[#1a1a17]">
         <nav
-          className="mx-auto flex h-13 max-w-7xl items-center justify-between px-5"
+          className="mx-auto flex h-14 max-w-7xl items-center justify-between px-5"
           aria-label="Main navigation"
         >
+
           {/* Brand */}
-          <NavLink
-            to="/"
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-zinc-100 hover:text-white transition-colors"
-          >
-            <span
-              className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-500 text-white"
-              aria-hidden="true"
-            >
-              <Code2 size={13} strokeWidth={2.5} />
-            </span>
-            AlgoGurukul
+          <NavLink to="/" className="flex items-center gap-2.5 select-none">
+            <LogoMark size={32} />
+            <div className="flex flex-col leading-none">
+              <span className="text-[13px] font-bold tracking-tight text-zinc-100">
+                AlgoGurukul
+              </span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.12em] text-indigo-400">
+                Practice · Learn · Solve
+              </span>
+            </div>
           </NavLink>
 
           {/* User menu */}
           <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setDropdownOpen((prev) => !prev)}
+              onClick={() => setDropdownOpen((v) => !v)}
               aria-haspopup="true"
               aria-expanded={dropdownOpen}
-              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-all duration-100"
+              className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-transparent px-2.5 py-1.5 transition-colors hover:border-zinc-600"
             >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-400 text-[10px] font-bold ring-1 ring-indigo-500/25"
-                aria-hidden="true"
-              >
-                {user?.firstName?.[0]?.toUpperCase() ?? 'G'}
+              {/* Avatar */}
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/15 text-[11px] font-semibold text-indigo-400 ring-1 ring-indigo-500/25">
+                {initials}
               </span>
-              <span className="hidden sm:inline text-zinc-300">
+              <span className="hidden text-xs font-medium text-zinc-300 sm:inline">
                 {user?.firstName ?? 'Guest'}
               </span>
               <ChevronDown
-                size={12}
-                className={`text-zinc-600 transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`}
+                size={13}
+                className={`text-zinc-600 transition-transform duration-150 ${
+                  dropdownOpen ? 'rotate-180' : ''
+                }`}
               />
             </button>
 
-            {/* Dropdown menu */}
+            {/* Dropdown */}
             {dropdownOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-full mt-1.5 w-44 rounded-xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-black/50 py-1 z-50"
+                className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-zinc-700/80 bg-[#1e1e1b] shadow-2xl shadow-black/60"
               >
-                <NavLink
-                  to="/dashboard"
-                  role="menuitem"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
-                >
-                  <BarChart3 size={13} aria-hidden="true" />
-                  My progress
-                </NavLink>
+                {/* User info header */}
+                <div className="border-b border-zinc-800 px-3.5 py-3">
+                  <p className="text-xs font-semibold text-zinc-100">
+                    {user?.firstName ?? 'Guest'} {user?.lastName ?? ''}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-zinc-600">
+                    {user?.emailId ?? ''}
+                  </p>
+                </div>
 
-                <NavLink
-                  to="/admin"
-                  role="menuitem"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-3.5 py-2 text-sm text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition-colors"
-                >
-                  <Shield size={13} aria-hidden="true" />
-                  Admin panel
-                </NavLink>
+                {/* Menu items */}
+                <div className="p-1">
+                  <NavLink
+                    to="/dashboard"
+                    role="menuitem"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                  >
+                    <User size={14} aria-hidden="true" />
+                    Profile
+                  </NavLink>
 
-                <div className="my-1 border-t border-zinc-800" role="separator" />
+                  <NavLink
+                    to="/dashboard"
+                    role="menuitem"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                  >
+                    <BarChart3 size={14} aria-hidden="true" />
+                    My progress
+                  </NavLink>
 
-                <button
-                  role="menuitem"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm text-rose-400 hover:text-rose-300 hover:bg-rose-500/[0.07] transition-colors"
-                >
-                  <LogOut size={13} aria-hidden="true" />
-                  Log out
-                </button>
+                  <NavLink
+                    to="/admin"
+                    role="menuitem"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                  >
+                    <Shield size={14} aria-hidden="true" />
+                    Admin panel
+                  </NavLink>
+
+                  <div className="my-1 h-px bg-zinc-800" role="separator" />
+
+                  <button
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-rose-500 transition-colors hover:bg-rose-500/8 hover:text-rose-400"
+                  >
+                    <LogOut size={14} aria-hidden="true" />
+                    Log out
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </nav>
       </header>
 
-      {/* ── Main ──────────────────────────────────────────────────────────────── */}
-      <main className="mx-auto w-full max-w-7xl px-5 py-8">
+      {/* ── Main ────────────────────────────────────────────────────────────── */}
+      <main className="mx-auto w-full max-w-7xl px-5 py-7">
 
-        {/* ── Page heading ────────────────────────────────────────────────────── */}
-        <div className="mb-6">
-          <h1 className="text-lg font-semibold text-zinc-100">Problems</h1>
-          <p className="mt-0.5 text-sm text-zinc-500">
+        {/* Page heading */}
+        <div className="mb-5 flex items-baseline justify-between gap-4">
+          <h1 className="text-sm font-semibold text-zinc-100">Problems</h1>
+          <p className="font-mono text-[11px] text-zinc-600">
             {problems.length} problems · {solvedProblems.length} solved
           </p>
         </div>
 
-        {/* ── Filter bar ──────────────────────────────────────────────────────── */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        {/* Topic pills */}
+        <div className="mb-5 flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {FILTER_DEFS.tag.map((tag) => (
+            <TopicPill
+              key={tag.value}
+              active={filters.tag === tag.value}
+              label={tag.label}
+              count={tag.value === 'all' ? undefined : tagCounts[tag.value]}
+              onClick={() => setFilter('tag', tag.value)}
+            />
+          ))}
+        </div>
 
-          {/* Pill filters — visible on sm+ */}
-          <div className="hidden sm:flex flex-wrap items-center gap-3">
-            <FilterGroup
-              label="Status"
-              value={filters.status}
-              options={FILTER_DEFS.status}
-              onChange={(v) => setFilter('status', v)}
+        {/* Filter bar */}
+        <div className="mb-4 flex flex-wrap items-center gap-2.5">
+
+          {/* Search */}
+          <div className="relative min-w-[180px] flex-1 sm:max-w-xs">
+            <Search
+              size={14}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600"
+              aria-hidden="true"
             />
-            <FilterGroup
-              label="Difficulty"
-              value={filters.difficulty}
-              options={FILTER_DEFS.difficulty}
-              onChange={(v) => setFilter('difficulty', v)}
-            />
-            <FilterGroup
-              label="Topic"
-              value={filters.tag}
-              options={FILTER_DEFS.tag}
-              onChange={(v) => setFilter('tag', v)}
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 w-full rounded-lg border border-zinc-700 bg-[#1a1a17] pl-9 pr-3 text-xs font-medium text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-zinc-500 transition-colors"
+              type="search"
+              placeholder="Search problems…"
             />
           </div>
 
-          {/* Select dropdowns — mobile only */}
-          <div className="flex sm:hidden flex-wrap gap-2">
-            <FilterSelect
-              value={filters.status}
-              options={FILTER_DEFS.status}
-              onChange={(v) => setFilter('status', v)}
-            />
-            <FilterSelect
-              value={filters.difficulty}
-              options={FILTER_DEFS.difficulty}
-              onChange={(v) => setFilter('difficulty', v)}
-            />
-            <FilterSelect
-              value={filters.tag}
-              options={FILTER_DEFS.tag}
-              onChange={(v) => setFilter('tag', v)}
-            />
-          </div>
+          <PillGroup
+            value={filters.status}
+            options={FILTER_DEFS.status}
+            onChange={(v) => setFilter('status', v)}
+          />
 
-          {/* Right side: count + clear */}
-          <div className="flex items-center gap-3 ml-auto">
-            {isFiltered && (
-              <button
-                onClick={clearFilters}
-                className="text-[11px] font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
-            <span className="text-[11px] text-zinc-600 tabular-nums">
+          <PillGroup
+            value={filters.difficulty}
+            options={FILTER_DEFS.difficulty}
+            onChange={(v) => setFilter('difficulty', v)}
+          />
+
+          <div className="ml-auto flex items-center gap-3">
+            <span className="font-mono text-[11px] text-zinc-600">
               {filteredProblems.length} result{filteredProblems.length !== 1 ? 's' : ''}
             </span>
+            {isFiltered && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="text-[11px] font-semibold text-indigo-400 transition-colors hover:text-indigo-300"
+              >
+                Clear
+              </button>
+            )}
           </div>
         </div>
 
-        {/* ── Problem table ────────────────────────────────────────────────────── */}
-        <div className="rounded-xl border border-zinc-900 bg-zinc-950 overflow-hidden">
+        {/* Problem table */}
+        <div className="overflow-hidden rounded-xl border border-zinc-800 bg-[#1a1a17]">
 
           {/* Column headers */}
-          <div className="grid grid-cols-[2.5rem_1fr_auto_auto] sm:grid-cols-[2.5rem_1fr_auto_auto_auto] gap-x-4 border-b border-zinc-900 px-4 py-2.5 bg-zinc-900/40">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-700">#</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-700">Title</span>
-            <span className="hidden sm:block text-[10px] font-bold uppercase tracking-widest text-zinc-700">Topic</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-700">Difficulty</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-700">Status</span>
+          <div className="grid grid-cols-[40px_minmax(0,1fr)_90px_80px_60px] items-center gap-3 border-b border-zinc-800 bg-[#1e1e1b] px-4 py-2.5 sm:grid-cols-[48px_minmax(0,1fr)_110px_100px_72px] sm:px-6">
+            <span className="text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-700">#</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-700">Title</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-700">Tag</span>
+            <span className="text-right text-[10px] font-semibold uppercase tracking-widest text-zinc-700">Accept.</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-700">Diff.</span>
           </div>
 
           {filteredProblems.length > 0 ? (
-            <ul role="list">
+            <ul role="list" className="divide-y divide-zinc-800/60">
               {filteredProblems.map((problem, idx) => {
                 const isSolved = solvedProblems.some((sp) => sp._id === problem._id);
 
                 return (
-                  <li
-                    key={problem._id}
-                    className={idx !== filteredProblems.length - 1 ? 'border-b border-zinc-900' : ''}
-                  >
+                  <li key={problem._id}>
                     <NavLink
                       to={`/problem/${problem._id}`}
-                      className="group grid grid-cols-[2.5rem_1fr_auto_auto] sm:grid-cols-[2.5rem_1fr_auto_auto_auto] items-center gap-x-4 px-4 py-3.5 transition-colors duration-100 hover:bg-zinc-900/50 focus-visible:bg-zinc-900/50 focus-visible:outline-none"
+                      className="group grid grid-cols-[40px_minmax(0,1fr)_90px_80px_60px] items-center gap-3 px-4 py-3 transition-colors hover:bg-[#1e1e1b] focus-visible:bg-[#1e1e1b] focus-visible:outline-none sm:grid-cols-[48px_minmax(0,1fr)_110px_100px_72px] sm:px-6"
                       aria-label={`${problem.title}, ${problem.difficulty}, ${isSolved ? 'solved' : 'open'}`}
                     >
                       {/* Index */}
-                      <span className="text-[11px] font-mono text-zinc-700 group-hover:text-zinc-500 transition-colors tabular-nums">
+                      <span
+                        className={`text-center font-mono text-[11px] font-semibold tabular-nums transition-colors ${
+                          isSolved
+                            ? 'text-green-500'
+                            : 'text-zinc-600 group-hover:text-zinc-500'
+                        }`}
+                      >
                         {String(idx + 1).padStart(2, '0')}
                       </span>
 
                       {/* Title */}
-                      <span className="min-w-0">
-                        <span className="flex items-center gap-2.5">
-                          <BookOpen
-                            size={13}
-                            className="shrink-0 text-zinc-700 group-hover:text-indigo-400 transition-colors"
-                            aria-hidden="true"
-                          />
-                          <span className="truncate text-sm font-medium text-zinc-300 group-hover:text-zinc-100 transition-colors">
-                            {problem.title}
-                          </span>
+                      <span className="truncate text-xs font-medium text-zinc-300 transition-colors group-hover:text-zinc-100 sm:text-sm">
+                        {problem.title}
+                      </span>
+
+                      {/* Tag */}
+                      <span className="truncate text-[11px] text-zinc-600">
+                        {formatTopic(problem.tags)}
+                      </span>
+
+                      {/* Acceptance */}
+                      <span className="text-right font-mono text-[11px] text-zinc-600">
+                        {getAcceptanceDisplay(problem)}
+                      </span>
+
+                      {/* Difficulty */}
+                      <span>
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${getDifficultyBadge(problem.difficulty)}`}
+                        >
+                          {formatDifficulty(problem.difficulty)}
                         </span>
                       </span>
-
-                      {/* Topic — hidden on mobile */}
-                      <span className="hidden sm:inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-[11px] font-medium text-zinc-500 ring-1 ring-zinc-800">
-                        {problem.tags}
-                      </span>
-
-                      {/* Difficulty badge */}
-                      <span
-                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ${getDifficultyStyle(problem.difficulty)}`}
-                      >
-                        {problem.difficulty}
-                      </span>
-
-                      {/* Status */}
-                      <StatusCell solved={isSolved} />
                     </NavLink>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            /* ── Empty state ──────────────────────────────────────────────────── */
-            <div className="flex flex-col items-center gap-4 py-16 text-center px-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900">
-                <BookOpen size={18} className="text-zinc-600" aria-hidden="true" />
+            /* Empty state */
+            <div className="flex flex-col items-center gap-3 py-14 text-center">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900">
+                <Search size={15} className="text-zinc-700" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-400">No problems match these filters</p>
-                <p className="mt-1 text-[13px] text-zinc-600">
-                  Try adjusting the difficulty, topic, or status filter.
+                <p className="text-xs font-medium text-zinc-400">
+                  No problems match these filters
+                </p>
+                <p className="mt-0.5 text-[11px] text-zinc-600">
+                  Try adjusting the search or filters above.
                 </p>
               </div>
               <button
                 onClick={clearFilters}
-                className="rounded-lg border border-zinc-800 px-3.5 py-1.5 text-sm font-medium text-zinc-300 hover:border-zinc-700 hover:text-zinc-100 transition-colors"
+                className="rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
               >
-                Clear all filters
+                Clear filters
               </button>
             </div>
           )}
