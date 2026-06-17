@@ -15,7 +15,7 @@ const  videoRouter =require("./routes/videoRouter");
 //new line
 app.set("trust proxy", 1);
 app.use(cors({
-  origin: true,
+  origin: ["https://algogurukul.netlify.app/","https://algo-gurukul.vercel.app/","http://localhost:5173/"],
   credentials: true
 }));
 
