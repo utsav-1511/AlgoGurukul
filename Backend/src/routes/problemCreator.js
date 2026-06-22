@@ -9,8 +9,8 @@ problemRouter.put("/update/:id",adminMiddleware,updateProblemById);
 problemRouter.delete("/delete/:id",adminMiddleware,deleteProblemById);
 
 
-problemRouter.get("/problemById/:id",userMiddleware,getProblemById);
-problemRouter.get("/getAllProblem/",userMiddleware,getAllProblem);
+problemRouter.get("/problemById/:id",getProblemById);
+problemRouter.get("/getAllProblem/",getAllProblem);
 problemRouter.get("/problemSolvedByUser",userMiddleware ,solvedAllProblemByUser);
 problemRouter.get("/submissions/:pid",userMiddleware,submissionMade);
 module.exports= problemRouter;

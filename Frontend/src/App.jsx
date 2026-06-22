@@ -44,7 +44,7 @@ if (loading) {
   return (
     <>
       <Routes>
-        <Route path="/" element={isAuthenticated ?<Homepage/>:<Navigate to="/signup"></Navigate>}></Route>
+        <Route path="/" element={<Homepage/>}></Route>
         <Route path="/dashboard" element={isAuthenticated ?<UserDashboard/>:<Navigate to="/signin"></Navigate>}></Route>
         <Route path="/signin" element={isAuthenticated ?<Navigate to="/"></Navigate>:<Login/>}></Route>
         <Route path="/signup" element={isAuthenticated ?<Navigate to="/"></Navigate>:<Register/>}></Route>

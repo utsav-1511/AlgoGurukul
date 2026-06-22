@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import Editor from '@monaco-editor/react';
-import { NavLink, useParams } from 'react-router';
+import { NavLink, useParams, useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../Components/SubmissionHistory"
 import ChatAi from '../Components/ChatAi';
 import Editorial from '../Components/Editorial';
 import { ArrowLeft, Bot, BookOpen, CheckCircle2, ClipboardList, Code2, FileText, Play, Send, Trophy } from 'lucide-react';
+
 
 const langMap = {
         cpp: 'Cpp',
@@ -46,12 +47,14 @@ const ProblemPage = () => {
   const [activeLeftTab, setActiveLeftTab] = useState('description');
   const [activeRightTab, setActiveRightTab] = useState('code');
   const editorRef = useRef(null);
+  const navigate = useNavigate();
   let {problemId}  = useParams();
-  const { user } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
-  
+  const authLocked = !isAuthenticated;
 
   const { handleSubmit } = useForm();
+
 
  useEffect(() => {
     const fetchProblem = async () => {
@@ -88,8 +91,11 @@ const ProblemPage = () => {
   }, [selectedLanguage, problem]);
 
   const handleEditorChange = (value) => {
+    // When not authenticated, keep the editor locked and prevent code edits.
+    if (authLocked) return;
     setCode(value || '');
   };
+
 
   const handleEditorDidMount = (editor) => {
     editorRef.current = editor;
@@ -99,9 +105,19 @@ const ProblemPage = () => {
     setSelectedLanguage(language);
   };
 
+  const handleRequireAuth = () => {
+    if (!authLocked) return true;
+    // Redirect to sign-in when user tries to run/submit.
+    navigate('/signin', { replace: true });
+    return false;
+  };
+
   const handleRun = async () => {
+    if (!handleRequireAuth()) return;
+
     setLoading(true);
     setRunResult(null);
+
 
     try {
       const response = await axiosClient.post(`/submission/runCode/${problemId}`, {
@@ -125,6 +141,8 @@ const ProblemPage = () => {
   };
 
   const handleSubmitCode = async () => {
+    if (!handleRequireAuth()) return;
+
     setLoading(true);
     setSubmitResult(null);
     
@@ -133,6 +151,7 @@ const ProblemPage = () => {
         code:code,
         language: selectedLanguage
       });
+
 
        setSubmitResult(response.data);
        console.log(response.data);
@@ -327,7 +346,10 @@ const ProblemPage = () => {
                 <div className="prose max-w-none">
                   <h2 className="text-xl font-bold mb-4">CHAT with AI</h2>
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    <ChatAi problem={problem} editorRef={editorRef}></ChatAi>
+                    {
+                      (authLocked? (<p>Login To Chat</p>):<ChatAi problem={problem} editorRef={editorRef}></ChatAi>)
+                    }
+                    {/* <ChatAi problem={problem} editorRef={editorRef}></ChatAi> */}
                   </div>
                 </div>
               )}
@@ -407,7 +429,7 @@ const ProblemPage = () => {
                     renderLineHighlight: 'line',
                     selectOnLineNumbers: true,
                     roundedSelection: false,
-                    readOnly: false,
+                  readOnly: authLocked,
                     cursorStyle: 'line',
                     mouseWheelZoom: true,
                   }}
@@ -415,7 +437,12 @@ const ProblemPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between border-t border-base-300 bg-base-100 p-3">
+              {(authLocked) ? (
+                <h2 className="bg-red-600 text-white px-4 py-2 rounded-md text-center font-semibold">
+                  Login required to execute this code
+                </h2>
+              ):<div className="flex justify-between border-t border-base-300 bg-base-100 p-3">
+                
                 <div className="flex gap-2">
                   <button 
                     className="btn btn-ghost btn-sm"
@@ -424,11 +451,13 @@ const ProblemPage = () => {
                     Console
                   </button>
                 </div>
+                
                 <div className="flex gap-2">
+                  
                   <button
                     className={`btn btn-outline btn-sm gap-2 ${loading ? 'loading' : ''}`}
                     onClick={handleRun}
-                    disabled={loading}
+                    disabled={loading || authLocked}
                   >
                     <Play size={16} />
                     Run
@@ -436,13 +465,45 @@ const ProblemPage = () => {
                   <button
                     className={`btn btn-primary btn-sm gap-2 ${loading ? 'loading' : ''}`}
                     onClick={handleSubmitCode}
-                    disabled={loading}
+                    disabled={loading || authLocked}
                   >
                     <Send size={16} />
                     Submit
                   </button>
                 </div>
               </div>
+            }
+              {/* <div className="flex justify-between border-t border-base-300 bg-base-100 p-3">
+                
+                <div className="flex gap-2">
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setActiveRightTab('testcase')}
+                  >
+                    Console
+                  </button>
+                </div>
+                
+                <div className="flex gap-2">
+                  
+                  <button
+                    className={`btn btn-outline btn-sm gap-2 ${loading ? 'loading' : ''}`}
+                    onClick={handleRun}
+                    disabled={loading || authLocked}
+                  >
+                    <Play size={16} />
+                    Run
+                  </button>
+                  <button
+                    className={`btn btn-primary btn-sm gap-2 ${loading ? 'loading' : ''}`}
+                    onClick={handleSubmitCode}
+                    disabled={loading || authLocked}
+                  >
+                    <Send size={16} />
+                    Submit
+                  </button>
+                </div>
+              </div> */}
             </div>
           )}
 
