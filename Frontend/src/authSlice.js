@@ -47,6 +47,7 @@ export const loginUser = createAsyncThunk(
       saveRole(user?.role);
       return user;
     } catch (error) {
+      console.log(error);
       return rejectWithValue(getErrorMessage(error));
     }
   }
@@ -118,6 +119,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = !!action.payload;
         state.user = action.payload;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

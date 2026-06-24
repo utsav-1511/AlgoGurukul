@@ -8,6 +8,9 @@ import {
   BarChart3, User,
 } from 'lucide-react';
 
+
+
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const DIFFICULTY_BADGES = {
@@ -153,7 +156,8 @@ const FILTER_DEFS = {
 function Homepage() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-
+  const isLoggedIn = Boolean(user?._id);
+  const isAdmin = user?.role === "admin";
   const [problems, setProblems]         = useState([]);
   const [solvedProblems, setSolvedProblems] = useState([]);
   const [filters, setFilters]           = useState({
@@ -272,89 +276,97 @@ function Homepage() {
 
           {/* User menu */}
           <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen((v) => !v)}
-              aria-haspopup="true"
-              aria-expanded={dropdownOpen}
-              className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-transparent px-2.5 py-1.5 transition-colors hover:border-zinc-600"
-            >
-              {/* Avatar */}
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/15 text-[11px] font-semibold text-indigo-400 ring-1 ring-indigo-500/25">
-                {initials}
-              </span>
-              <span className="hidden text-xs font-medium text-zinc-300 sm:inline">
-                {user?.firstName ?? 'Guest'}
-              </span>
-              <ChevronDown
-                size={13}
-                className={`text-zinc-600 transition-transform duration-150 ${
-                  dropdownOpen ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-
-            {/* Dropdown */}
-            {dropdownOpen && (
-              <div
-                role="menu"
-                className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-zinc-700/80 bg-[#1e1e1b] shadow-2xl shadow-black/60"
+          {isLoggedIn ? (
+            <>
+              <button
+                onClick={() => setDropdownOpen((v) => !v)}
+                aria-haspopup="true"
+                aria-expanded={dropdownOpen}
+                className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-transparent px-2.5 py-1.5 transition-colors hover:border-zinc-600"
               >
-                {/* User info header */}
-                <div className="border-b border-zinc-800 px-3.5 py-3">
-                  <p className="text-xs font-semibold text-zinc-100">
-                    {user?.firstName ?? 'Guest'} {user?.lastName ?? ''}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-zinc-600">
-                    {user?.emailId ?? ''}
-                  </p>
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/15 text-[11px] font-semibold text-indigo-400 ring-1 ring-indigo-500/25">
+                  {initials}
+                </span>
+
+                <span className="hidden text-xs font-medium text-zinc-300 sm:inline">
+                  {user.firstName}
+                </span>
+
+                <ChevronDown
+                  size={13}
+                  className={`text-zinc-600 transition-transform duration-150 ${
+                    dropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {dropdownOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-50 mt-1.5 w-52 overflow-hidden rounded-xl border border-zinc-700/80 bg-[#1e1e1b] shadow-2xl shadow-black/60"
+                >
+                  <div className="border-b border-zinc-800 px-3.5 py-3">
+                    <p className="text-xs font-semibold text-zinc-100">
+                      {user.firstName} {user.lastName}
+                    </p>
+
+                    <p className="mt-0.5 text-[11px] text-zinc-600">
+                      {user.emailId}
+                    </p>
+                  </div>
+
+                  <div className="p-1">
+                    <NavLink
+                      to="/dashboard"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                    >
+                      <User size={14} />
+                      Profile
+                    </NavLink>
+
+                    {isAdmin && (
+                      <NavLink
+                        to="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                      >
+                        <Shield size={14} />
+                        Admin Panel
+                      </NavLink>
+                    )}
+
+                    <div className="my-1 h-px bg-zinc-800" />
+
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-400"
+                    >
+                      <LogOut size={14} />
+                      Log out
+                    </button>
+                  </div>
                 </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <NavLink
+                to="/signin"
+                className="rounded-lg border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:text-white"
+              >
+                Login
+              </NavLink>
 
-                {/* Menu items */}
-                <div className="p-1">
-                  <NavLink
-                    to="/dashboard"
-                    role="menuitem"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                  >
-                    <User size={14} aria-hidden="true" />
-                    Profile
-                  </NavLink>
-
-                  <NavLink
-                    to="/dashboard"
-                    role="menuitem"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                  >
-                    <BarChart3 size={14} aria-hidden="true" />
-                    My progress
-                  </NavLink>
-
-                  <NavLink
-                    to="/admin"
-                    role="menuitem"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
-                  >
-                    <Shield size={14} aria-hidden="true" />
-                    Admin panel
-                  </NavLink>
-
-                  <div className="my-1 h-px bg-zinc-800" role="separator" />
-
-                  <button
-                    role="menuitem"
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs font-medium text-rose-500 transition-colors hover:bg-rose-500/8 hover:text-rose-400"
-                  >
-                    <LogOut size={14} aria-hidden="true" />
-                    Log out
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              <NavLink
+                to="/signup"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+              >
+                Sign Up
+              </NavLink>
+            </div>
+          )}
+        </div>
         </nav>
       </header>
 

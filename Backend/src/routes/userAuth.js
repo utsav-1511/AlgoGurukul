@@ -1,6 +1,6 @@
 const express = require("express");
 const authRouter = express.Router();
-const {register,login,logout,adminRegister,deleteProfile} = require("../controllers/userAuthent");
+const {register,login,logout,adminRegister,deleteProfile,updateProfile} = require("../controllers/userAuthent");
 const userMiddleware = require("../middleware/userMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 
@@ -20,6 +20,8 @@ authRouter.post("/admin/register",adminMiddleware,adminRegister);
 // authRouter.use("/getProfile",getProfile);
 
 authRouter.delete("/profile",userMiddleware,deleteProfile);
+
+authRouter.put("/profile",userMiddleware,updateProfile);
 
 authRouter.get("/check",userMiddleware,async(req,res)=>{
     reply={

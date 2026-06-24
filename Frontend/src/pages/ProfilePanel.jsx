@@ -18,8 +18,7 @@ function ProfilePanel() {
   const initials = `${user?.firstName?.[0] || 'G'}${user?.lastName?.[0] || ''}`.toUpperCase();
   const handle = user?.emailId ? `@${user.emailId.split('@')[0]}` : '@learner';
   const detailRows = [
-    { icon: UserRound, label: 'First name', value: user?.firstName || '-' },
-    { icon: UserRound, label: 'Last name', value: user?.lastName || '-' },
+    { icon: UserRound, label: 'First name', value: user?.firstName+" "+user?.lastName || '-' },
     { icon: Mail, label: 'Email', value: user?.emailId || '-' },
   ];
 
@@ -30,7 +29,7 @@ function ProfilePanel() {
 
     setLoadingUpdate(true);
     try {
-      await axiosClient.put('/profile', { firstName, lastName });
+      await axiosClient.put('user/profile', { firstName, lastName });
       setMessage('Profile updated successfully');
     } catch (err) {
       setError(
@@ -52,7 +51,7 @@ function ProfilePanel() {
 
     setLoadingDelete(true);
     try {
-      await axiosClient.delete('/profile');
+      await axiosClient.delete('user/profile');
       setMessage('Profile deleted successfully');
     } catch (err) {
       setError(
@@ -112,7 +111,7 @@ function ProfilePanel() {
             {isEditing ? 'Cancel' : 'Edit'}
           </button>
 
-          <button
+          {/* <button
             disabled={loadingDelete}
             type="button"
             onClick={onDelete}
@@ -120,7 +119,7 @@ function ProfilePanel() {
           >
             <Trash2 size={22} aria-hidden="true" />
             {loadingDelete ? 'Deleting...' : 'Delete'}
-          </button>
+          </button> */}
         </div>
       </div>
 

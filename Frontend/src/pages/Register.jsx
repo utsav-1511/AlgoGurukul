@@ -14,10 +14,6 @@ const registerSchema = z.object({
       .string()
       .min(3, "First name is required"),
 
-    lastName: z
-      .string()
-      .min(3, "Last name is required"),
-
     emailId: z
       .string()
       .min(5, "Email is required")
@@ -97,7 +93,7 @@ const Register = () => {
             </div>
 
             {/* Last Name */}
-            <div>
+            {/* <div>
                 <input
                 type="text"
                 placeholder="Last Name"
@@ -109,7 +105,7 @@ const Register = () => {
                     {errors.lastName.message}
                 </p>
                 )}
-            </div>
+            </div> */}
 
             {/* Email */}
             <div>

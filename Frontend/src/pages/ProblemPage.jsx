@@ -407,7 +407,7 @@ const ProblemPage = () => {
               {/* Monaco Editor */}
               <div className="flex-1">
                 <Editor
-                  height="100%"
+                  height="99%"
                   language={getLanguageForMonaco(selectedLanguage)}
                   value={code}
                   onChange={handleEditorChange}
@@ -438,9 +438,29 @@ const ProblemPage = () => {
 
               {/* Action Buttons */}
               {(authLocked) ? (
-                <h2 className="bg-red-600 text-white px-4 py-2 rounded-md text-center font-semibold">
-                  Login required to execute this code
-                </h2>
+                  <div>
+                    <h2 className="bg-red-400 text-white px-4 py-1 mb-1 rounded-md text-center font-semibold">
+                      Login required to execute this code
+                    </h2>
+                
+                <div className="flex justify-evenly mb-1 ">
+                  <NavLink
+                    to="/signin"
+                    className="rounded-lg bg-blue-600 border border-zinc-700 px-20 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-indigo-500 hover:text-white"
+                  >
+                    Login
+                  </NavLink>
+
+                  <NavLink
+                    to="/signup"
+                    className="rounded-lg bg-blue-600 px-20 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+                  >
+                    Sign Up
+                  </NavLink>
+                </div>
+                </div>
+
+
               ):<div className="flex justify-between border-t border-base-300 bg-base-100 p-3">
                 
                 <div className="flex gap-2">

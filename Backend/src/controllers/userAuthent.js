@@ -76,7 +76,10 @@ const login = async(req,res)=>{
         });
     }
     catch(err){
-        res.status(401).send("Error ",err);
+        res.status(401).json({
+            success: false,
+            message: err.message
+        });
     }
 }
 
@@ -129,4 +132,20 @@ const deleteProfile = async(req,res)=>{
     }
 }
 
-module.exports= {register,login,logout,adminRegister,deleteProfile}
+const updateProfile = async(req,res)=>{
+    try{
+        console.log("update profile")
+        const id = req.result._id;
+        await User.findByIdAndUpdate(id,{
+            firstName:req.body.firstName,
+            lastName:req.body.lastName
+        });
+        res.status(200).json({
+            message:"User Updated"
+    })
+    }
+    catch(err){
+        res.status(500).send("Error "+err)
+    }
+}
+module.exports= {register,login,logout,adminRegister,deleteProfile,updateProfile}
